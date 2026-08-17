@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Non-Rev Search</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;color:#222}
+.container{width:95%;max-width:1400px;margin:25px auto}
+.page-header{text-align:center;margin-bottom:25px}
+.page-header h1{margin:0;font-size:32px}
+.page-header p{color:#666;margin-top:8px}
+.search-box{background:#fff;padding:22px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:20px}
+.search-row{display:flex;gap:15px;align-items:flex-end;flex-wrap:wrap}
+.field{flex:1;min-width:180px}
+.field label{display:block;font-weight:700;margin-bottom:7px}
+input{width:100%;padding:13px 14px;border:1px solid #ccc;border-radius:7px;font-size:17px;text-transform:uppercase;outline:none}
+input:focus{border-color:#555}
+button{border:none;border-radius:7px;padding:13px 22px;font-size:16px;cursor:pointer;background:#222;color:#fff}
+button:hover{opacity:.85}.refresh-button{background:#555}
+#status{text-align:center;margin:15px 0;min-height:20px;color:#666}
+.error{color:#c62828!important;font-weight:bold}.success{color:#2e7d32!important}
+.no-results{background:#fff;border-radius:12px;padding:40px 20px;text-align:center;color:#666;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.flight-card{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:25px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.flight-header{background:#222;color:#fff;padding:20px 24px}.route{font-size:30px;font-weight:700}.flight-date{margin-top:5px;opacity:.8}
+.flight-info{padding:20px}.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.info-box{background:#f5f6f7;border-radius:8px;padding:15px}.info-label{color:#777;font-size:12px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.info-value{font-size:22px;font-weight:700}
+.standby-section{padding:20px;border-top:1px solid #eee}
+.standby-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:15px}
+.standby-title{font-size:23px;font-weight:700}.standby-count{font-size:15px;color:#777;font-weight:normal}
+.standby-table{width:100%;border-collapse:collapse}
+.standby-table th{background:#f1f3f5;padding:12px;text-align:left;font-size:13px;text-transform:uppercase}
+.standby-table td{padding:13px 12px;border-top:1px solid #eee}
+.passenger{font-weight:700}.seat{font-weight:700;font-size:18px}.priority{font-weight:800}.status-code{font-weight:700}
+.p-d1t,.p-d1{color:#c62828}.p-d2t,.p-d2{color:#ef6c00}.p-d3t,.p-d3{color:#2e7d32}
+.summary{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.summary-item{background:#f5f6f7;border-radius:7px;padding:8px 12px;font-size:14px}
+.summary-item strong{margin-left:4px}
+@media(max-width:700px){
+.container{width:96%;margin:15px auto}.page-header h1{font-size:26px}.route{font-size:24px}
+.search-row{display:block}.field{margin-bottom:12px}.search-row button{width:100%;margin-top:5px}
+.refresh-button{margin-top:10px!important}.standby-table thead{display:none}
+.standby-table,.standby-table tbody,.standby-table tr,.standby-table td{display:block;width:100%}
+.standby-table tr{background:#fafafa;border-radius:8px;padding:10px;margin-bottom:10px}
+.standby-table td{border:none;padding:5px 8px}
+.standby-table td::before{display:inline-block;width:90px;color:#777;font-weight:700;font-size:12px}
+.standby-table td:nth-child(1)::before{content:"Priority"}.standby-table td:nth-child(2)::before{content:"Passenger"}
+.standby-table td:nth-child(3)::before{content:"Cabin"}.standby-table td:nth-child(4)::before{content:"Seat"}
+.standby-table td:nth-child(5)::before{content:"Status"}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="page-header">
+<h1>Flight Non-Rev Search</h1>
+<p>Search flight availability and non-revenue standbys</p>
+</div>
+
+<div class="search-box">
+<div class="search-row">
+<div class="field">
+<label for="fromAirport">From Airport</label>
+<input id="fromAirport" type="text" placeholder="MCO" maxlength="4" autocomplete="off">
+</div>
+<div class="field">
+<label for="toAirport">To Airport</label>
+<input id="toAirport" type="text" placeholder="LHR" maxlength="4" autocomplete="off">
+</div>
+<button onclick="searchFlights()">Search</button>
+<button class="refresh-button" onclick="loadSheet()">Refresh Data</button>
+</div>
+</div>
+
+<div id="status"></div>
+<div id="results"></div>
+</div>
+
+<script>
+/*
+=========================================================
+GOOGLE SHEET
+=========================================================
+*/
+const SHEET_ID = "15UYMC7w6YvkKrhOemhlEUh2rvKdYEom4";
+const SHEET_GID = "2142382046";
+
+/*
+IMPORTANT:
+This version uses Google's JSONP response handler instead
+of browser fetch(). That avoids the CORS problem that can
+occur when this HTML is opened directly from a computer
+or hosted on another domain.
+*/
+const GOOGLE_URL =
+    "https://docs.google.com/spreadsheets/d/" +
+    SHEET_ID +
+    "/gviz/tq?tqx=responseHandler:handleGoogleResponse" +
+    "&headers=1" +
+    "&gid=" + SHEET_GID;
+
+let sheetRows = [];
+let requestNumber = 0;
+
+function loadSheet() {
+    const status = document.getElementById("status");
+    const results = document.getElementById("results");
+
+    status.innerHTML = "Loading flight data...";
+    results.innerHTML = "";
+
+    requestNumber++;
+    const callbackName = "handleGoogleResponse";
+
+    /*
+    Remove an old JSONP script if one exists.
+    */
+    const oldScript = document.getElementById("googleSheetScript");
+    if (oldScript) oldScript.remove();
+
+    /*
+    JSONP works by adding a script tag instead of using
+    fetch(), so normal browser CORS restrictions do not
+    block the request.
+    */
+    const script = document.createElement("script");
+    script.id = "googleSheetScript";
+    script.src = GOOGLE_URL + "&_=" + Date.now();
+
+    script.onerror = function() {
+        status.innerHTML =
+            '<span class="error">' +
+            'Unable to load the Google Sheet. ' +
+            'Make sure Sheet5 is published to the web or ' +
+            'available to anyone with the link.' +
+            '</span>';
+    };
+
+    document.head.appendChild(script);
+}
+
+
+/*
+=========================================================
+GOOGLE JSONP CALLBACK
+=========================================================
+*/
+window.handleGoogleResponse = function(data) {
+
+    const status = document.getElementById("status");
+
+    try {
+
+        if (!data || !data.table) {
+            throw new Error("Google returned no table data.");
+        }
+
+        if (data.table.rows) {
+
+            sheetRows = data.table.rows.map(function(row) {
+
+                const values = [];
+
+                /*
+                A-L = 12 columns.
+                */
+                for (let i = 0; i < 12; i++) {
+
+                    if (
+                        row.c &&
+                        row.c[i] &&
+                        row.c[i].v !== null &&
+                        row.c[i].v !== undefined
+                    ) {
+
+                        values.push(String(row.c[i].v));
+
+                    } else {
+
+                        values.push("");
+
+                    }
+
+                }
+
+                return values;
+
+            });
+
+        } else {
+
+            sheetRows = [];
+
+        }
+
+        status.innerHTML =
+            '<span class="success">' +
+            'Data loaded successfully (' +
+            sheetRows.length +
+            ' rows)' +
+            '</span>';
+
+        /*
+        If a search was already entered, automatically
+        display the matching flight after refresh.
+        */
+        const from = document
+            .getElementById("fromAirport")
+            .value
+            .trim();
+
+        const to = document
+            .getElementById("toAirport")
+            .value
+            .trim();
+
+        if (from && to) {
+            searchFlights();
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.innerHTML =
+            '<span class="error">' +
+            'Google returned data, but it could not be parsed.' +
+            '</span>';
+
+    }
+};
+
+
+/*
+=========================================================
+SEARCH
+=========================================================
+*/
+function searchFlights() {
+
+    const from = document
+        .getElementById("fromAirport")
+        .value
+        .trim()
+        .toUpperCase();
+
+    const to = document
+        .getElementById("toAirport")
+        .value
+        .trim()
+        .toUpperCase();
+
+    const results =
+        document.getElementById("results");
+
+    if (!from || !to) {
+
+        results.innerHTML =
+            '<div class="no-results">' +
+            'Please enter both a <strong>From</strong> and ' +
+            '<strong>To</strong> airport.' +
+            '</div>';
+
+        return;
+    }
+
+    if (!sheetRows.length) {
+
+        results.innerHTML =
+            '<div class="no-results">' +
+            'Flight data is still loading. Please try again.' +
+            '</div>';
+
+        return;
+    }
+
+    const matches = sheetRows.filter(function(row) {
+
+        /*
+        A = Flight_Date
+        B = From_ Airport
+        C = To_Airport
+        D = First_Available
+        E = Main_Available
+        F = Business_Available
+        G = PremEcon_Available
+        H = Total_Available
+        I = DT_Pull1
+        J = DT_Pull2
+        K = DT_Pull3
+        L = DT_Pull4
+        */
+
+        const rowFrom =
+            normalizeAirport(row[1]);
+
+        const rowTo =
+            normalizeAirport(row[2]);
+
+        return (
+            rowFrom === from &&
+            rowTo === to
+        );
+
+    });
+
+    if (!matches.length) {
+
+        results.innerHTML =
+            '<div class="no-results">' +
+            'No flight found for <strong>' +
+            escapeHtml(from) +
+            '</strong> → <strong>' +
+            escapeHtml(to) +
+            '</strong>' +
+            '</div>';
+
+        return;
+    }
+
+    results.innerHTML =
+        matches
+            .map(function(row) {
+                return createFlightCard(row);
+            })
+            .join("");
+}
+
+
+/*
+=========================================================
+AIRPORT NORMALIZATION
+=========================================================
+*/
+function normalizeAirport(value) {
+
+    return String(value || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "");
+
+}
+
+
+/*
+=========================================================
+FLIGHT CARD
+=========================================================
+*/
+function createFlightCard(row) {
+
+    const flightDate = row[0];
+    const from = row[1];
+    const to = row[2];
+
+    const firstAvailable = row[3];
+    const mainAvailable = row[4];
+    const businessAvailable = row[5];
+    const premEconAvailable = row[6];
+    const totalAvailable = row[7];
+
+    /*
+    Combine DT_Pull1 through DT_Pull4.
+    */
+    const standbyText = [
+        row[8],
+        row[9],
+        row[10],
+        row[11]
+    ]
+    .filter(function(value) {
+        return value !== null &&
+               value !== undefined &&
+               String(value).trim() !== "";
+    })
+    .join("\n");
+
+    const standbys =
+        parseStandbys(standbyText);
+
+    return `
+        <div class="flight-card">
+
+            <div class="flight-header">
+
+                <div class="route">
+                    ${escapeHtml(from)}
+                    →
+                    ${escapeHtml(to)}
+                </div>
+
+                <div class="flight-date">
+                    Flight Date:
+                    ${escapeHtml(flightDate)}
+                </div>
+
+            </div>
+
+            <div class="flight-info">
+
+                <div class="info-grid">
+
+                    ${infoBox("First Available", firstAvailable)}
+
+                    ${infoBox("Main Available", mainAvailable)}
+
+                    ${infoBox("Business Available", businessAvailable)}
+
+                    ${infoBox("Premium Economy Available", premEconAvailable)}
+
+                    ${infoBox("Total Available", totalAvailable)}
+
+                </div>
+
+                ${createSummary(standbys)}
+
+            </div>
+
+            <div class="standby-section">
+
+                <div class="standby-heading">
+
+                    <div class="standby-title">
+                        Non-Revenue Standbys
+                        <span class="standby-count">
+                            (${standbys.length})
+                        </span>
+                    </div>
+
+                </div>
+
+                ${
+                    standbys.length
+                    ? createStandbyTable(standbys)
+                    : '<div style="color:#777;">' +
+                      'No non-revenue standby information available.' +
+                      '</div>'
+                }
+
+            </div>
+
+        </div>
+    `;
+}
+
+
+/*
+=========================================================
+INFO BOX
+=========================================================
+*/
+function infoBox(label, value) {
+
+    return `
+        <div class="info-box">
+
+            <div class="info-label">
+                ${escapeHtml(label)}
+            </div>
+
+            <div class="info-value">
+                ${escapeHtml(value || "—")}
+            </div>
+
+        </div>
+    `;
+}
+
+
+/*
+=========================================================
+PARSE NON-REV DATA
+=========================================================
+*/
+function parseStandbys(text) {
+
+    if (!text || !text.trim()) {
+        return [];
+    }
+
+    let lines = text
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split("\n")
+        .map(function(line) {
+            return line.trim();
+        })
+        .filter(function(line) {
+            return line !== "";
+        });
+
+    /*
+    Remove the heading and count.
+    */
+    lines = lines.filter(function(line) {
+
+        const lower = line.toLowerCase();
+
+        if (
+            lower.includes("non-revenue standbys")
+        ) {
+            return false;
+        }
+
+        if (/^\(\d+\)$/.test(line)) {
+            return false;
+        }
+
+        return true;
+    });
+
+    const records = [];
+    let current = null;
+
+    /*
+    Build records:
+
+    1.
+    CHE/C
+    D1T
+    Main
+    19A
+    AL2
+    */
+    for (let i = 0; i < lines.length; i++) {
+
+        const line = lines[i];
+
+        const numberMatch =
+            line.match(/^(\d+)\.$/);
+
+        if (numberMatch) {
+
+            if (current) {
+                records.push(current);
+            }
+
+            current = {
+                number: numberMatch[1],
+                values: []
+            };
+
+            continue;
+        }
+
+        if (current) {
+            current.values.push(line);
+        }
+    }
+
+    if (current) {
+        records.push(current);
+    }
+
+    return records.map(function(record) {
+
+        const values = record.values;
+
+        return {
+            number: record.number,
+            passenger: values[0] || "",
+            priority: values[1] || "",
+            cabin: values[2] || "",
+            seat: values[3] || "",
+            status: values[4] || ""
+        };
+
+    });
+}
+
+
+/*
+=========================================================
+STANDBY TABLE
+=========================================================
+*/
+function createStandbyTable(rows) {
+
+    return `
+        <table class="standby-table">
+
+            <thead>
+
+                <tr>
+                    <th>Priority</th>
+                    <th>Passenger</th>
+                    <th>Cabin</th>
+                    <th>Seat</th>
+                    <th>Status</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                ${
+                    rows.map(function(row) {
+
+                        const priorityClass =
+                            getPriorityClass(
+                                row.priority
+                            );
+
+                        return `
+                            <tr>
+
+                                <td>
+                                    <span class="priority ${priorityClass}">
+                                        ${escapeHtml(row.priority)}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="passenger">
+                                        ${escapeHtml(row.passenger)}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    ${escapeHtml(row.cabin)}
+                                </td>
+
+                                <td>
+                                    <span class="seat">
+                                        ${escapeHtml(row.seat)}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="status-code">
+                                        ${escapeHtml(row.status || "—")}
+                                    </span>
+                                </td>
+
+                            </tr>
+                        `;
+
+                    }).join("")
+                }
+
+            </tbody>
+
+        </table>
+    `;
+}
+
+
+/*
+=========================================================
+PRIORITY COLORS
+=========================================================
+*/
+function getPriorityClass(priority) {
+
+    const p = String(priority || "")
+        .toUpperCase()
+        .replace(/\s/g, "");
+
+    if (p === "D1T") return "p-d1t";
+    if (p === "D1") return "p-d1";
+    if (p === "D2T") return "p-d2t";
+    if (p === "D2") return "p-d2";
+    if (p === "D3T") return "p-d3t";
+    if (p === "D3") return "p-d3";
+
+    return "";
+}
+
+
+/*
+=========================================================
+SUMMARY
+=========================================================
+*/
+function createSummary(rows) {
+
+    if (!rows.length) {
+        return "";
+    }
+
+    const counts = {};
+
+    rows.forEach(function(row) {
+
+        const priority =
+            row.priority || "Unknown";
+
+        counts[priority] =
+            (counts[priority] || 0) + 1;
+    });
+
+    return `
+        <div class="summary">
+
+            ${
+                Object.entries(counts)
+                .map(function(entry) {
+
+                    const priority = entry[0];
+                    const count = entry[1];
+
+                    return `
+                        <div class="summary-item">
+                            ${escapeHtml(priority)}
+                            <strong>${count}</strong>
+                        </div>
+                    `;
+
+                })
+                .join("")
+            }
+
+        </div>
+    `;
+}
+
+
+/*
+=========================================================
+ESCAPE HTML
+=========================================================
+*/
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/*
+=========================================================
+ENTER KEY
+=========================================================
+*/
+document
+    .getElementById("fromAirport")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            searchFlights();
+        }
+
+    });
+
+document
+    .getElementById("toAirport")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            searchFlights();
+        }
+
+    });
+
+
+/*
+=========================================================
+INITIAL LOAD
+=========================================================
+*/
+loadSheet();
+
+</script>
+
+</body>
+</html>
