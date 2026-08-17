@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Load Lookup</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f4f6f8;
+        color: #17202a;
+    }
+
+    .container {
+        width: min(1100px, 94%);
+        margin: 40px auto;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .header h1 {
+        margin: 0 0 8px;
+        font-size: clamp(28px, 5vw, 42px);
+    }
+
+    .header p {
+        margin: 0;
+        color: #68737d;
+        font-size: 16px;
+    }
+
+    .search-box {
+        background: white;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.08);
+
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 7px;
+        font-size: 14px;
+    }
+
+    input,
+    button {
+        width: 100%;
+        min-height: 46px;
+        border-radius: 8px;
+        font-size: 16px;
+    }
+
+    input {
+        border: 1px solid #cbd2d9;
+        padding: 10px 12px;
+        background: white;
+    }
+
+    button {
+        border: 0;
+        padding: 10px 22px;
+        background: #1d4ed8;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #1e40af;
+    }
+
+    button:disabled {
+        opacity: .6;
+        cursor: wait;
+    }
+
+    #status {
+        text-align: center;
+        margin: 20px 0;
+        color: #68737d;
+        min-height: 22px;
+    }
+
+    .error {
+        color: #b42318 !important;
+        font-weight: 700;
+    }
+
+    .result {
+        background: white;
+        border-radius: 14px;
+        margin-top: 18px;
+        padding: 22px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.07);
+    }
+
+    .route {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 15px;
+        margin-bottom: 18px;
+    }
+
+    .route-title {
+        font-size: 25px;
+        font-weight: 800;
+    }
+
+    .route-date {
+        color: #68737d;
+        font-size: 15px;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .stat {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .stat-label {
+        color: #68737d;
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .stat-value {
+        font-size: 25px;
+        font-weight: 800;
+    }
+
+    .availability {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    .availability th,
+    .availability td {
+        padding: 13px 12px;
+        text-align: center;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .availability th {
+        background: #f7f8fa;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+
+    .availability td:first-child,
+    .availability th:first-child {
+        text-align: left;
+    }
+
+    .availability tr:last-child td {
+        border-bottom: 0;
+        font-weight: 800;
+    }
+
+    .pulled {
+        margin-top: 15px;
+        color: #68737d;
+        font-size: 13px;
+    }
+
+    .raw-data {
+        margin-top: 18px;
+    }
+
+    .raw-data summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: #374151;
+    }
+
+    .raw-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 18px;
+        margin-top: 12px;
+    }
+
+    .raw-item {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .raw-item strong {
+        display: block;
+        font-size: 12px;
+        color: #68737d;
+        margin-bottom: 3px;
+    }
+
+    .footer {
+        text-align: center;
+        color: #89929b;
+        font-size: 12px;
+        margin: 28px 0;
+    }
+
+    @media (max-width: 760px) {
+        .search-box {
+            grid-template-columns: 1fr;
+        }
+
+        .stats {
+            grid-template-columns: 1fr;
+        }
+
+        .availability {
+            font-size: 14px;
+        }
+
+        .availability th,
+        .availability td {
+            padding: 10px 6px;
+        }
+
+        .raw-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Flight Load Lookup</h1>
+        <p>Search the latest flight availability from the Google Sheet.</p>
+    </div>
+
+    <form class="search-box" id="searchForm">
+
+        <div>
+            <label for="flightDate">Flight Date</label>
+            <input
+                type="date"
+                id="flightDate"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="fromAirport">From Airport</label>
+            <input
+                type="text"
+                id="fromAirport"
+                placeholder="MCO"
+                maxlength="5"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="toAirport">To Airport</label>
+            <input
+                type="text"
+                id="toAirport"
+                placeholder="NRT"
+                maxlength="5"
+                required
+            >
+        </div>
+
+        <button type="submit" id="searchButton">
+            Search
+        </button>
+
+    </form>
+
+    <div id="status"></div>
+
+    <div id="results"></div>
+
+    <div class="footer">
+        Data is retrieved directly from the public Google Sheet.
+    </div>
+
+</div>
+
+
+<script>
+
+/*
+===========================================================
+GOOGLE SHEET SETTINGS
+===========================================================
+*/
+
+const SPREADSHEET_ID =
+    "15UYMC7w6YvkKrhOemhlEUh2rvKdYEom4";
+
+
+/*
+===========================================================
+EXPECTED GOOGLE SHEET COLUMNS
+===========================================================
+*/
+
+const EXPECTED_HEADERS = [
+
+    "Flight_Date",
+
+    "From_Airport",
+
+    "To_Airport",
+
+    "Total_Seats_Available",
+
+    "Total_NonRevs_Listed",
+
+    "First_Available",
+
+    "First_NonRevs_Listed",
+
+    "Main_Avilable",
+
+    "Main_NonRevs_Listed",
+
+    "Business_Available",
+
+    "Business_NonRevs_Listed",
+
+    "PremEcon_Available",
+
+    "Prem_Econ_NonRevs_Listed",
+
+    "Date_Data_Pulled"
+
+];
+
+
+/*
+===========================================================
+PAGE ELEMENTS
+===========================================================
+*/
+
+const statusEl =
+    document.getElementById("status");
+
+const resultsEl =
+    document.getElementById("results");
+
+const searchButton =
+    document.getElementById("searchButton");
+
+
+/*
+===========================================================
+AIRPORT INPUTS
+===========================================================
+*/
+
+document
+    .getElementById("fromAirport")
+    .addEventListener("input", function () {
+
+        this.value =
+            this.value
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, "");
+
+    });
+
+
+document
+    .getElementById("toAirport")
+    .addEventListener("input", function () {
+
+        this.value =
+            this.value
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, "");
+
+    });
+
+
+/*
+===========================================================
+SEARCH
+===========================================================
+*/
+
+document
+    .getElementById("searchForm")
+    .addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+
+        const date =
+            document
+                .getElementById("flightDate")
+                .value;
+
+        const from =
+            document
+                .getElementById("fromAirport")
+                .value
+                .trim()
+                .toUpperCase();
+
+        const to =
+            document
+                .getElementById("toAirport")
+                .value
+                .trim()
+                .toUpperCase();
+
+
+        if (!date || !from || !to) {
+            return;
+        }
+
+
+        searchButton.disabled = true;
+
+        statusEl.className = "";
+
+        statusEl.textContent =
+            "Searching Google Sheet...";
+
+        resultsEl.innerHTML = "";
+
+
+        try {
+
+            /*
+            Get rows matching the route.
+            */
+
+            const rows =
+                await queryGoogleSheet(from, to);
+
+
+            /*
+            Filter by:
+
+            Flight Date
+            From Airport
+            To Airport
+            */
+
+            const matches =
+                rows.filter(function (row) {
+
+                    return (
+
+                        normalizeDate(row[0]) === date
+
+                        &&
+
+                        normalizeAirport(row[1]) === from
+
+                        &&
+
+                        normalizeAirport(row[2]) === to
+
+                    );
+
+                });
+
+
+            /*
+            =================================================
+            SORT BY DATE_DATA_PULLED
+            =================================================
+
+            Column 14 = Date_Data_Pulled
+
+            Most recent date appears FIRST.
+
+            Example:
+
+            08/17/2026
+            08/16/2026
+            08/15/2026
+            08/14/2026
+            */
+
+            matches.sort(function (a, b) {
+
+                return (
+
+                    parsePulledDate(b[13])
+
+                    -
+
+                    parsePulledDate(a[13])
+
+                );
+
+            });
+
+
+            searchButton.disabled = false;
+
+
+            /*
+            No results
+            */
+
+            if (matches.length === 0) {
+
+                statusEl.textContent =
+                    "No matching flight data was found.";
+
+                return;
+
+            }
+
+
+            /*
+            Results found
+            */
+
+            statusEl.textContent =
+                matches.length +
+                " matching record" +
+                (matches.length === 1 ? "" : "s") +
+                " found.";
+
+
+            /*
+            Display results
+            */
+
+            resultsEl.innerHTML =
+                matches
+                    .map(buildResult)
+                    .join("");
+
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            searchButton.disabled = false;
+
+            statusEl.className =
+                "error";
+
+            statusEl.textContent =
+                "Unable to read the Google Sheet. " +
+                "Make sure the sheet is shared as " +
+                "Anyone with the link → Viewer.";
+
+        }
+
+    });
+
+
+/*
+===========================================================
+QUERY GOOGLE SHEET
+===========================================================
+*/
+
+function queryGoogleSheet(from, to) {
+
+    /*
+    Only request rows for the selected route.
+
+    Column B = From_Airport
+    Column C = To_Airport
+    */
+
+    const query =
+
+        "select * where B = '" +
+
+        escapeQuery(from) +
+
+        "' and C = '" +
+
+        escapeQuery(to) +
+
+        "'";
+
+
+    const params =
+
+        "tqx=" +
+
+        encodeURIComponent(
+            "out:json;responseHandler:googleSheetCallback"
+        )
+
+        +
+
+        "&tq=" +
+
+        encodeURIComponent(query);
+
+
+    const url =
+
+        "https://docs.google.com/spreadsheets/d/" +
+
+        SPREADSHEET_ID +
+
+        "/gviz/tq?" +
+
+        params;
+
+
+    return new Promise(function (resolve, reject) {
+
+        const callbackName =
+            "googleSheetCallback";
+
+
+        window[callbackName] =
+            function (data) {
+
+                try {
+
+                    delete window[callbackName];
+
+
+                    if (
+                        !data ||
+                        !data.table ||
+                        !data.table.rows
+                    ) {
+
+                        reject(
+                            new Error(
+                                "Invalid Google Sheet response."
+                            )
+                        );
+
+                        return;
+
+                    }
+
+
+                    const rows =
+
+                        data.table.rows.map(
+                            function (row) {
+
+                                const cells =
+                                    row.c || [];
+
+
+                                return cells.map(
+                                    function (cell) {
+
+                                        if (!cell) {
+                                            return "";
+                                        }
+
+
+                                        return cell.f !== undefined
+                                            ? cell.f
+                                            : cell.v;
+
+                                    }
+                                );
+
+                            }
+                        );
+
+
+                    resolve(rows);
+
+                }
+
+                catch (error) {
+
+                    reject(error);
+
+                }
+
+                finally {
+
+                    if (script) {
+                        script.remove();
+                    }
+
+                }
+
+            };
+
+
+        const script =
+            document.createElement("script");
+
+
+        script.src = url;
+
+
+        script.onerror =
+            function () {
+
+                delete window[callbackName];
+
+                script.remove();
+
+                reject(
+                    new Error(
+                        "Google Sheet request failed."
+                    )
+                );
+
+            };
+
+
+        document.head.appendChild(script);
+
+    });
+
+}
+
+
+/*
+===========================================================
+ESCAPE GOOGLE QUERY
+===========================================================
+*/
+
+function escapeQuery(value) {
+
+    return String(value)
+        .replace(/'/g, "''");
+
+}
+
+
+/*
+===========================================================
+NORMALIZE AIRPORT
+===========================================================
+*/
+
+function normalizeAirport(value) {
+
+    return String(value || "")
+        .trim()
+        .toUpperCase();
+
+}
+
+
+/*
+===========================================================
+NORMALIZE FLIGHT DATE
+===========================================================
+*/
+
+function normalizeDate(value) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    const s =
+        String(value).trim();
+
+
+    /*
+    MM/DD/YYYY
+    */
+
+    let match =
+        s.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+        );
+
+
+    if (match) {
+
+        const month =
+            match[1].padStart(2, "0");
+
+        const day =
+            match[2].padStart(2, "0");
+
+        return (
+
+            match[3] +
+
+            "-" +
+
+            month +
+
+            "-" +
+
+            day
+
+        );
+
+    }
+
+
+    /*
+    MM-DD-YYYY
+    */
+
+    match =
+        s.match(
+            /^(\d{1,2})-(\d{1,2})-(\d{4})$/
+        );
+
+
+    if (match) {
+
+        const month =
+            match[1].padStart(2, "0");
+
+        const day =
+            match[2].padStart(2, "0");
+
+        return (
+
+            match[3] +
+
+            "-" +
+
+            month +
+
+            "-" +
+
+            day
+
+        );
+
+    }
+
+
+    /*
+    YYYY-MM-DD
+    */
+
+    match =
+        s.match(
+            /^(\d{4})-(\d{1,2})-(\d{1,2})/
+        );
+
+
+    if (match) {
+
+        return (
+
+            match[1] +
+
+            "-" +
+
+            match[2].padStart(2, "0") +
+
+            "-" +
+
+            match[3].padStart(2, "0")
+
+        );
+
+    }
+
+
+    return s;
+
+}
+
+
+/*
+===========================================================
+PARSE DATE_DATA_PULLED
+===========================================================
+
+The Google Sheet will contain dates like:
+
+08/17/2026
+08/16/2026
+08/15/2026
+
+This function converts them into numbers so JavaScript
+can correctly sort newest → oldest.
+===========================================================
+*/
+
+function parsePulledDate(value) {
+
+    if (!value) {
+        return 0;
+    }
+
+
+    const s =
+        String(value).trim();
+
+
+    /*
+    MM/DD/YYYY
+    */
+
+    let match =
+        s.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+        );
+
+
+    if (match) {
+
+        return new Date(
+
+            Number(match[3]),
+
+            Number(match[1]) - 1,
+
+            Number(match[2])
+
+        ).getTime();
+
+    }
+
+
+    /*
+    YYYY-MM-DD
+    */
+
+    match =
+        s.match(
+            /^(\d{4})-(\d{1,2})-(\d{1,2})/
+        );
+
+
+    if (match) {
+
+        return new Date(
+
+            Number(match[1]),
+
+            Number(match[2]) - 1,
+
+            Number(match[3])
+
+        ).getTime();
+
+    }
+
+
+    /*
+    Fallback
+    */
+
+    const parsed =
+        Date.parse(s);
+
+
+    return Number.isNaN(parsed)
+        ? 0
+        : parsed;
+
+}
+
+
+/*
+===========================================================
+NUMBER DISPLAY
+===========================================================
+*/
+
+function numberOrDash(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return "—";
+
+    }
+
+
+    return value;
+
+}
+
+
+/*
+===========================================================
+BUILD RESULT
+===========================================================
+*/
+
+function buildResult(row) {
+
+    const flightDate =
+        row[0] || "";
+
+    const from =
+        row[1] || "";
+
+    const to =
+        row[2] || "";
+
+
+    const totalAvailable =
+        numberOrDash(row[3]);
+
+    const totalNonRevs =
+        numberOrDash(row[4]);
+
+
+    return `
+
+        <div class="result">
+
+            <div class="route">
+
+                <div>
+
+                    <div class="route-title">
+
+                        ${escapeHTML(from)}
+                        →
+                        ${escapeHTML(to)}
+
+                    </div>
+
+                    <div class="route-date">
+
+                        ${escapeHTML(flightDate)}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <div class="stat-label">
+
+                        Total Seats Available
+
+                    </div>
+
+                    <div class="stat-value">
+
+                        ${escapeHTML(totalAvailable)}
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat">
+
+                    <div class="stat-label">
+
+                        Total Non-Revs Listed
+
+                    </div>
+
+                    <div class="stat-value">
+
+                        ${escapeHTML(totalNonRevs)}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <table class="availability">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Cabin</th>
+
+                        <th>Available</th>
+
+                        <th>Non-Revs Listed</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr>
+
+                        <td>First</td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[5])
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[6])
+                            )}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>Main</td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[7])
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[8])
+                            )}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>Business</td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[9])
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[10])
+                            )}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>Premium Economy</td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[11])
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                numberOrDash(row[12])
+                            )}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>TOTAL</td>
+
+                        <td>
+                            ${escapeHTML(
+                                totalAvailable
+                            )}
+                        </td>
+
+                        <td>
+                            ${escapeHTML(
+                                totalNonRevs
+                            )}
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+
+            <div class="pulled">
+
+                Data Pulled:
+
+                <strong>
+                    ${escapeHTML(
+                        row[13] || "—"
+                    )}
+                </strong>
+
+            </div>
+
+
+            <details class="raw-data">
+
+                <summary>
+                    Show all spreadsheet information
+                </summary>
+
+
+                <div class="raw-grid">
+
+                    ${EXPECTED_HEADERS
+                        .map(function (header, index) {
+
+                            return `
+
+                                <div class="raw-item">
+
+                                    <strong>
+                                        ${escapeHTML(header)}
+                                    </strong>
+
+                                    ${escapeHTML(
+                                        numberOrDash(
+                                            row[index]
+                                        )
+                                    )}
+
+                                </div>
+
+                            `;
+
+                        })
+                        .join("")}
+
+                </div>
+
+            </details>
+
+        </div>
+
+    `;
+
+}
+
+
+/*
+===========================================================
+HTML ESCAPE
+===========================================================
+*/
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+}
+
+</script>
+
+</body>
+</html>
