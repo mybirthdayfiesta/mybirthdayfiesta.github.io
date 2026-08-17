@@ -18,7 +18,7 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;color:#2
 input{width:100%;padding:13px 14px;border:1px solid #ccc;border-radius:7px;font-size:17px;text-transform:uppercase;outline:none}
 input:focus{border-color:#555}
 button{border:none;border-radius:7px;padding:13px 22px;font-size:16px;cursor:pointer;background:#222;color:#fff}
-button:hover{opacity:.85}.refresh-button{background:#555}.key-button{background:#1f6feb}.key-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;padding:25px;overflow:auto}.key-modal{background:#fff;max-width:1000px;margin:30px auto;border-radius:12px;box-shadow:0 10px 35px rgba(0,0,0,.25);overflow:hidden}.key-header{background:#222;color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center}.key-header h2{margin:0;font-size:24px}.key-close{background:#555;padding:8px 14px}.key-body{padding:20px}.key-table{width:100%;border-collapse:collapse}.key-table th{background:#f1f3f5;text-align:left;padding:12px;text-transform:uppercase;font-size:13px}.key-table td{padding:12px;border-top:1px solid #eee}.key-loading{text-align:center;padding:25px;color:#666}.key-error{text-align:center;padding:25px;color:#c62828;font-weight:bold}.key-row:nth-child(even){background:#fafafa}
+button:hover{opacity:.85}.refresh-button{background:#555}
 #status{text-align:center;margin:15px 0;min-height:20px;color:#666}
 .error{color:#c62828!important;font-weight:bold}.success{color:#2e7d32!important}
 .no-results{background:#fff;border-radius:12px;padding:40px 20px;text-align:center;color:#666;box-shadow:0 2px 10px rgba(0,0,0,.06)}
@@ -27,7 +27,7 @@ button:hover{opacity:.85}.refresh-button{background:#555}.key-button{background:
 .flight-info{padding:20px}.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
 .info-box{background:#f5f6f7;border-radius:8px;padding:15px}.info-label{color:#777;font-size:12px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
 .info-value{font-size:22px;font-weight:700}
-.standby-section{padding:20px;border-top:1px solid #eee}.standby-details{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}.standby-summary{cursor:pointer;padding:15px;background:#f5f6f7;font-size:23px;font-weight:700;list-style:none}.standby-summary::-webkit-details-marker{display:none}.standby-summary:after{content:"＋";float:right}.standby-details[open] .standby-summary:after{content:"−"}.standby-content{padding:20px;background:#fff}.priority-details{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}.priority-summary{cursor:pointer;padding:13px 15px;background:#fafafa;font-weight:700;list-style:none}.priority-summary::-webkit-details-marker{display:none}.priority-summary:after{content:"＋";float:right;font-size:18px}.priority-details[open] .priority-summary:after{content:"−"}.priority-content{padding:15px;background:#fff}
+.standby-section{padding:20px;border-top:1px solid #eee}
 .standby-heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:15px}
 .standby-title{font-size:23px;font-weight:700}.standby-count{font-size:15px;color:#777;font-weight:normal}
 .standby-table{width:100%;border-collapse:collapse}
@@ -71,27 +71,11 @@ button:hover{opacity:.85}.refresh-button{background:#555}.key-button{background:
 </div>
 <button onclick="searchFlights()">Search</button>
 <button class="refresh-button" onclick="loadSheet()">Refresh Data</button>
-<button class="key-button" onclick="toggleKey()">Key</button>
 </div>
 </div>
 
 <div id="status"></div>
 <div id="results"></div>
-</div>
-
-
-<!-- KEY MODAL -->
-<div id="keyOverlay" class="key-overlay" onclick="closeKeyFromOverlay(event)">
-    <div class="key-modal">
-        <div class="key-header">
-            <h2>Key</h2>
-            <button class="key-close" type="button" onclick="toggleKey()">Close</button>
-        </div>
-        <div class="key-body">
-            <div id="keyStatus" class="key-loading">Loading key...</div>
-            <div id="keyResults"></div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -436,40 +420,24 @@ function createFlightCard(row) {
 
             <div class="standby-section">
 
-                <details class="standby-details">
+                <div class="standby-heading">
 
-                    <summary class="standby-summary">
+                    <div class="standby-title">
                         Non-Revenue Standbys
                         <span class="standby-count">
                             (${standbys.length})
                         </span>
-                    </summary>
-
-                    <div class="standby-content">
-
-                        <details class="priority-details">
-
-                            <summary class="priority-summary">
-                                Priority / Passenger / Cabin / Seat / Status
-                            </summary>
-
-                            <div class="priority-content">
-
-                                ${
-                                    standbys.length
-                                    ? createStandbyTable(standbys)
-                                    : '<div style="color:#777;">' +
-                                      'No non-revenue standby information available.' +
-                                      '</div>'
-                                }
-
-                            </div>
-
-                        </details>
-
                     </div>
 
-                </details>
+                </div>
+
+                ${
+                    standbys.length
+                    ? createStandbyTable(standbys)
+                    : '<div style="color:#777;">' +
+                      'No non-revenue standby information available.' +
+                      '</div>'
+                }
 
             </div>
 
@@ -790,262 +758,6 @@ document
         }
 
     });
-
-
-
-/*
-=========================================================
-SHEET3 KEY
-=========================================================
-*/
-/*
-Published Google Sheet for the Key.
-The Key uses the new Google Sheet supplied by the user.
-*/
-const KEY_SHEET_ID = "1SnL7EmpnOLRBgiXyG6cVGrFDaaPb45roHHRUqaBL0vM";
-
-/*
-Exact published Sheet3 tab:
-https://docs.google.com/spreadsheets/d/e/1YgSFUzcBSBFgTrzr57MfodVff5-9P2qnvE3PNTicK7M/pubhtml?gid=1758478435&single=true
-
-Use Google's published CSV export for this exact tab.
-*/
-const KEY_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/" +
-    KEY_SHEET_ID +
-    "/gviz/tq?tqx=out:csv";
-
-let keyLoaded = false;
-let keyLoading = false;
-
-function toggleKey() {
-
-    const overlay = document.getElementById("keyOverlay");
-
-    if (!overlay) {
-        console.error("Key overlay element was not found.");
-        return;
-    }
-
-    if (overlay.style.display === "block") {
-        overlay.style.display = "none";
-        return;
-    }
-
-    overlay.style.display = "block";
-
-    if (!keyLoaded && !keyLoading) {
-        loadKey();
-    }
-}
-
-function closeKeyFromOverlay(event) {
-    const overlay = document.getElementById("keyOverlay");
-
-    if (overlay && event.target === overlay) {
-        overlay.style.display = "none";
-    }
-}
-
-
-function loadKey() {
-
-    const status = document.getElementById("keyStatus");
-    const results = document.getElementById("keyResults");
-
-    if (!status || !results) {
-        console.error("Key display elements were not found.");
-        return;
-    }
-
-    keyLoading = true;
-
-    status.className = "key-loading";
-    status.textContent = "Loading Key...";
-    results.innerHTML = "";
-
-    fetch(KEY_CSV_URL + "&_=" + Date.now())
-        .then(function(response) {
-
-            if (!response.ok) {
-                throw new Error(
-                    "Sheet3 CSV request failed: " +
-                    response.status
-                );
-            }
-
-            return response.text();
-        })
-        .then(function(csvText) {
-
-            const rows = parseCSV(csvText);
-
-            if (!rows.length) {
-                throw new Error("Sheet3 returned no rows.");
-            }
-
-            /*
-            Display only columns A-C.
-            The first row is the Sheet3 header row.
-            */
-            const headers = [
-                rows[0][0] || "Column A",
-                rows[0][1] || "Column B",
-                rows[0][2] || "Column C"
-            ];
-
-            let tableRows = "";
-
-            for (let i = 1; i < rows.length; i++) {
-
-                const row = rows[i];
-
-                const a = row[0] || "";
-                const b = row[1] || "";
-                const c = row[2] || "";
-
-                if (
-                    !String(a).trim() &&
-                    !String(b).trim() &&
-                    !String(c).trim()
-                ) {
-                    continue;
-                }
-
-                tableRows += `
-                    <tr class="key-row">
-                        <td>${escapeHtml(a)}</td>
-                        <td>${escapeHtml(b)}</td>
-                        <td>${escapeHtml(c)}</td>
-                    </tr>
-                `;
-            }
-
-            if (!tableRows) {
-
-                results.innerHTML =
-                    '<div class="key-loading">' +
-                    'Sheet3 loaded, but columns A-C contain no data.' +
-                    '</div>';
-
-            } else {
-
-                results.innerHTML = `
-                    <table class="key-table">
-                        <thead>
-                            <tr>
-                                <th>${escapeHtml(headers[0])}</th>
-                                <th>${escapeHtml(headers[1])}</th>
-                                <th>${escapeHtml(headers[2])}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
-                `;
-
-            }
-
-            status.className = "key-loading";
-            status.textContent = "";
-            keyLoaded = true;
-            keyLoading = false;
-
-        })
-        .catch(function(error) {
-
-            console.error(
-                "Sheet3 Key error:",
-                error
-            );
-
-            keyLoading = false;
-
-            status.className = "key-error";
-
-            status.textContent =
-                "Unable to load Sheet3. " +
-                "The published Sheet3 CSV could not be accessed.";
-
-        });
-}
-
-
-/*
-=========================================================
-CSV PARSER
-=========================================================
-*/
-function parseCSV(text) {
-
-    const rows = [];
-    let row = [];
-    let field = "";
-    let insideQuotes = false;
-
-    for (let i = 0; i < text.length; i++) {
-
-        const char = text[i];
-        const next = text[i + 1];
-
-        if (char === '"') {
-
-            if (insideQuotes && next === '"') {
-                field += '"';
-                i++;
-            } else {
-                insideQuotes = !insideQuotes;
-            }
-
-        } else if (char === "," && !insideQuotes) {
-
-            row.push(field);
-            field = "";
-
-        } else if (
-            (char === "\n" || char === "\r") &&
-            !insideQuotes
-        ) {
-
-            if (char === "\r" && next === "\n") {
-                i++;
-            }
-
-            row.push(field);
-            field = "";
-
-            if (row.some(function(value) {
-                return String(value).trim() !== "";
-            })) {
-                rows.push(row);
-            }
-
-            row = [];
-
-        } else {
-
-            field += char;
-
-        }
-    }
-
-    /*
-    Add final field/row.
-    */
-    if (field !== "" || row.length) {
-
-        row.push(field);
-
-        if (row.some(function(value) {
-            return String(value).trim() !== "";
-        })) {
-            rows.push(row);
-        }
-    }
-
-    return rows;
-}
 
 
 /*
