@@ -1,373 +1,566 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Flight Load Lookup</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
 
-    body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f4f6f8;
-        color: #17202a;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    .container {
-        width: min(1100px, 94%);
-        margin: 40px auto;
-    }
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #17202a;
+}
 
-    .header {
-        text-align: center;
-        margin-bottom: 25px;
-    }
+.container {
+    width: min(1100px, 94%);
+    margin: 40px auto;
+}
 
-    .header h1 {
-        margin: 0 0 8px;
-        font-size: clamp(28px, 5vw, 42px);
-    }
+.header {
+    text-align: center;
+    margin-bottom: 25px;
+}
 
-    .header p {
-        margin: 0;
-        color: #68737d;
-        font-size: 16px;
-    }
+.header h1 {
+    margin: 0 0 8px;
+    font-size: clamp(28px, 5vw, 42px);
+}
+
+.header p {
+    margin: 0;
+    color: #68737d;
+    font-size: 16px;
+}
+
+.search-box {
+    background: white;
+    border-radius: 14px;
+    padding: 22px;
+
+    box-shadow:
+        0 4px 18px rgba(0,0,0,.08);
+
+    display: grid;
+
+    grid-template-columns:
+        1.2fr 1fr 1fr auto auto;
+
+    gap: 14px;
+
+    align-items: end;
+}
+
+label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 7px;
+    font-size: 14px;
+}
+
+input,
+button {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+input {
+    border: 1px solid #cbd2d9;
+    padding: 10px 12px;
+    background: white;
+}
+
+button {
+    border: 0;
+    padding: 10px 22px;
+    background: #1d4ed8;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1e40af;
+}
+
+button:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.key-button {
+    background: #374151;
+}
+
+.key-button:hover {
+    background: #1f2937;
+}
+
+#status {
+    text-align: center;
+    margin: 20px 0;
+    color: #68737d;
+    min-height: 22px;
+}
+
+.error {
+    color: #b42318 !important;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   DIAGNOSTIC
+========================================================= */
+
+.diagnostic {
+    margin-top: 15px;
+    padding: 15px;
+
+    border-radius: 8px;
+
+    background: #eef2ff;
+
+    color: #3730a3;
+
+    font-size: 13px;
+
+    line-height: 1.8;
+}
+
+.diagnostic-title {
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.route-debug {
+    margin-top: 12px;
+
+    background: white;
+
+    border-radius: 7px;
+
+    padding: 10px;
+
+    overflow-x: auto;
+}
+
+.route-debug table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+}
+
+.route-debug th,
+.route-debug td {
+    padding: 7px 8px;
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    text-align: left;
+}
+
+.route-debug th {
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   RESULTS
+========================================================= */
+
+.result {
+    background: white;
+
+    border-radius: 14px;
+
+    margin-top: 18px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 4px 18px rgba(0,0,0,.07);
+}
+
+.route {
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    gap: 15px;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    padding-bottom: 15px;
+
+    margin-bottom: 18px;
+}
+
+.route-title {
+    font-size: 25px;
+
+    font-weight: 800;
+}
+
+.route-date {
+    color: #68737d;
+
+    font-size: 15px;
+}
+
+.stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 12px;
+
+    margin-bottom: 18px;
+}
+
+.stat {
+    border:
+        1px solid #e5e7eb;
+
+    border-radius: 10px;
+
+    padding: 15px;
+}
+
+.stat-label {
+    color: #68737d;
+
+    font-size: 13px;
+
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 25px;
+
+    font-weight: 800;
+}
+
+.availability {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.availability th,
+.availability td {
+    padding: 13px 12px;
+
+    text-align: center;
+
+    border-bottom:
+        1px solid #e5e7eb;
+}
+
+.availability th {
+    background: #f7f8fa;
+
+    font-size: 13px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .03em;
+}
+
+.availability td:first-child,
+.availability th:first-child {
+    text-align: left;
+}
+
+.availability tr:last-child td {
+    border-bottom: 0;
+
+    font-weight: 800;
+}
+
+.pulled {
+    margin-top: 15px;
+
+    color: #68737d;
+
+    font-size: 13px;
+}
+
+.raw-data {
+    margin-top: 18px;
+}
+
+.raw-data summary {
+    cursor: pointer;
+
+    font-weight: 700;
+
+    color: #374151;
+}
+
+.raw-grid {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px 18px;
+
+    margin-top: 12px;
+}
+
+.raw-item {
+    padding: 8px 0;
+
+    border-bottom:
+        1px solid #eee;
+}
+
+.raw-item strong {
+    display: block;
+
+    font-size: 12px;
+
+    color: #68737d;
+
+    margin-bottom: 3px;
+}
+
+
+/* =========================================================
+   KEY MODAL
+========================================================= */
+
+.key-modal {
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    background:
+        rgba(0,0,0,.55);
+
+    padding: 30px 15px;
+
+    overflow-y: auto;
+}
+
+.key-modal.open {
+    display: block;
+}
+
+.key-modal-content {
+    width: min(900px, 100%);
+
+    margin: 30px auto;
+
+    background: white;
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.2);
+}
+
+.key-modal-header {
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 18px;
+}
+
+.key-modal-header h2 {
+    margin: 0;
+
+    font-size: 26px;
+}
+
+.key-close {
+    width: auto;
+
+    min-height: auto;
+
+    padding: 7px 13px;
+
+    background: #e5e7eb;
+
+    color: #111827;
+
+    font-size: 20px;
+}
+
+.key-close:hover {
+    background: #d1d5db;
+}
+
+.key-table-wrap {
+    overflow-x: auto;
+}
+
+.key-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+.key-table th,
+.key-table td {
+    padding: 12px 10px;
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    text-align: left;
+}
+
+.key-table th {
+    background: #f7f8fa;
+
+    font-size: 13px;
+
+    text-transform: uppercase;
+}
+
+.key-loading,
+.key-error,
+.key-empty {
+    text-align: center;
+
+    padding: 25px 10px;
+
+    color: #68737d;
+}
+
+.key-error {
+    color: #b42318;
+
+    font-weight: 700;
+}
+
+.footer {
+    text-align: center;
+
+    color: #89929b;
+
+    font-size: 12px;
+
+    margin: 28px 0;
+}
+
+
+@media (max-width: 760px) {
 
     .search-box {
-        background: white;
-        border-radius: 14px;
-        padding: 22px;
-        box-shadow: 0 4px 18px rgba(0,0,0,.08);
-
-        display: grid;
-        grid-template-columns: 1.2fr 1fr 1fr auto;
-        gap: 14px;
-        align-items: end;
-    }
-
-    label {
-        display: block;
-        font-weight: 700;
-        margin-bottom: 7px;
-        font-size: 14px;
-    }
-
-    input,
-    button {
-        width: 100%;
-        min-height: 46px;
-        border-radius: 8px;
-        font-size: 16px;
-    }
-
-    input {
-        border: 1px solid #cbd2d9;
-        padding: 10px 12px;
-        background: white;
-    }
-
-    button {
-        border: 0;
-        padding: 10px 22px;
-        background: #1d4ed8;
-        color: white;
-        font-weight: 700;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #1e40af;
-    }
-
-    button:disabled {
-        opacity: .6;
-        cursor: wait;
-    }
-
-    .key-button {
-        background: #374151;
-    }
-
-    .key-button:hover {
-        background: #1f2937;
-    }
-
-    .key-modal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 1000;
-        background: rgba(0, 0, 0, .55);
-        padding: 30px 15px;
-        overflow-y: auto;
-    }
-
-    .key-modal.open {
-        display: block;
-    }
-
-    .key-modal-content {
-        width: min(900px, 100%);
-        margin: 30px auto;
-        background: white;
-        border-radius: 14px;
-        padding: 22px;
-        box-shadow: 0 10px 35px rgba(0,0,0,.2);
-    }
-
-    .key-modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 18px;
-    }
-
-    .key-modal-header h2 {
-        margin: 0;
-        font-size: 26px;
-    }
-
-    .key-close {
-        width: auto;
-        min-height: auto;
-        padding: 7px 13px;
-        background: #e5e7eb;
-        color: #111827;
-        font-size: 20px;
-    }
-
-    .key-close:hover {
-        background: #d1d5db;
-    }
-
-    .key-table-wrap {
-        overflow-x: auto;
-    }
-
-    .key-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .key-table th,
-    .key-table td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #e5e7eb;
-        text-align: left;
-    }
-
-    .key-table th {
-        background: #f7f8fa;
-        font-size: 13px;
-        text-transform: uppercase;
-    }
-
-    .key-loading,
-    .key-error,
-    .key-empty {
-        text-align: center;
-        padding: 25px 10px;
-        color: #68737d;
-    }
-
-    .key-error {
-        color: #b42318;
-        font-weight: 700;
-    }
-
-
-    #status {
-        text-align: center;
-        margin: 20px 0;
-        color: #68737d;
-        min-height: 22px;
-    }
-
-    .error {
-        color: #b42318 !important;
-        font-weight: 700;
-    }
-
-    .result {
-        background: white;
-        border-radius: 14px;
-        margin-top: 18px;
-        padding: 22px;
-        box-shadow: 0 4px 18px rgba(0,0,0,.07);
-    }
-
-    .route {
-        display: flex;
-        justify-content: space-between;
-        gap: 15px;
-        align-items: center;
-        flex-wrap: wrap;
-
-        border-bottom: 1px solid #e5e7eb;
-        padding-bottom: 15px;
-        margin-bottom: 18px;
-    }
-
-    .route-title {
-        font-size: 25px;
-        font-weight: 800;
-    }
-
-    .route-date {
-        color: #68737d;
-        font-size: 15px;
+        grid-template-columns: 1fr;
     }
 
     .stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin-bottom: 18px;
-    }
-
-    .stat {
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 15px;
-    }
-
-    .stat-label {
-        color: #68737d;
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
-
-    .stat-value {
-        font-size: 25px;
-        font-weight: 800;
+        grid-template-columns: 1fr;
     }
 
     .availability {
-        width: 100%;
-        border-collapse: collapse;
-        overflow: hidden;
-        border-radius: 10px;
+        font-size: 14px;
     }
 
     .availability th,
     .availability td {
-        padding: 13px 12px;
-        text-align: center;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .availability th {
-        background: #f7f8fa;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: .03em;
-    }
-
-    .availability td:first-child,
-    .availability th:first-child {
-        text-align: left;
-    }
-
-    .availability tr:last-child td {
-        border-bottom: 0;
-        font-weight: 800;
-    }
-
-    .pulled {
-        margin-top: 15px;
-        color: #68737d;
-        font-size: 13px;
-    }
-
-    .raw-data {
-        margin-top: 18px;
-    }
-
-    .raw-data summary {
-        cursor: pointer;
-        font-weight: 700;
-        color: #374151;
+        padding: 10px 6px;
     }
 
     .raw-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px 18px;
-        margin-top: 12px;
+        grid-template-columns: 1fr;
     }
 
-    .raw-item {
-        padding: 8px 0;
-        border-bottom: 1px solid #eee;
-    }
+}
 
-    .raw-item strong {
-        display: block;
-        font-size: 12px;
-        color: #68737d;
-        margin-bottom: 3px;
-    }
-
-    .footer {
-        text-align: center;
-        color: #89929b;
-        font-size: 12px;
-        margin: 28px 0;
-    }
-
-    @media (max-width: 760px) {
-        .search-box {
-            grid-template-columns: 1fr;
-        }
-
-        .stats {
-            grid-template-columns: 1fr;
-        }
-
-        .availability {
-            font-size: 14px;
-        }
-
-        .availability th,
-        .availability td {
-            padding: 10px 6px;
-        }
-
-        .raw-grid {
-            grid-template-columns: 1fr;
-        }
-    }
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
+
     <div class="header">
-        <h1>Flight Load Lookup</h1>
-        <p>Search the latest flight availability from the Google Sheet.</p>
+
+        <h1>
+            Flight Load Lookup
+        </h1>
+
+        <p>
+            Search the latest flight availability from the Google Sheet.
+        </p>
+
     </div>
 
-    <form class="search-box" id="searchForm">
+
+    <form
+        class="search-box"
+        id="searchForm"
+    >
+
 
         <div>
-            <label for="flightDate">Flight Date</label>
+
+            <label for="flightDate">
+                Flight Date
+            </label>
+
             <input
                 type="date"
                 id="flightDate"
                 required
             >
+
         </div>
 
+
         <div>
-            <label for="fromAirport">From Airport</label>
+
+            <label for="fromAirport">
+                From Airport
+            </label>
+
             <input
                 type="text"
                 id="fromAirport"
@@ -375,687 +568,789 @@
                 maxlength="5"
                 required
             >
+
         </div>
 
+
         <div>
-            <label for="toAirport">To Airport</label>
+
+            <label for="toAirport">
+                To Airport
+            </label>
+
             <input
                 type="text"
                 id="toAirport"
-                placeholder="NRT"
+                placeholder="DFW"
                 maxlength="5"
                 required
             >
+
         </div>
 
-        <button type="submit" id="searchButton">
+
+        <button
+            type="submit"
+            id="searchButton"
+        >
             Search
         </button>
 
-        <button type="button" id="keyButton" class="key-button">
+
+        <button
+            type="button"
+            id="keyButton"
+            class="key-button"
+        >
             Key
         </button>
 
+
     </form>
+
 
     <div id="status"></div>
 
+
     <div id="results"></div>
 
+
+    <div id="diagnostic"></div>
+
+
     <div class="footer">
+
         Data is retrieved directly from the public Google Sheet.
+
     </div>
+
 
 </div>
 
 
-<!-- Key modal -->
-<div id="keyModal" class="key-modal" aria-hidden="true">
+
+<!-- =====================================================
+     KEY MODAL
+====================================================== -->
+
+<div
+    id="keyModal"
+    class="key-modal"
+    aria-hidden="true"
+>
+
     <div class="key-modal-content">
+
+
         <div class="key-modal-header">
-            <h2>Flight Key</h2>
-            <button type="button" id="keyCloseButton" class="key-close" aria-label="Close">×</button>
+
+            <h2>
+                Flight Key
+            </h2>
+
+
+            <button
+                type="button"
+                id="keyCloseButton"
+                class="key-close"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
         </div>
+
+
         <div id="keyContent">
-            <div class="key-loading">Loading Sheet4...</div>
+
+            <div class="key-loading">
+                Loading Sheet1...
+            </div>
+
         </div>
+
+
     </div>
+
 </div>
 
 
-<script src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script>
 
-/*
-===========================================================
-GOOGLE SHEET SETTINGS
-===========================================================
-*/
+
+/* =========================================================
+   GOOGLE SHEET SETTINGS
+========================================================= */
+
 
 const SPREADSHEET_ID =
-    "15UYMC7w6YvkKrhOemhlEUh2rvKdYEom4";
+    "1d-oZCR18gyXyu6V49iIL72LmeznRFgBj";
 
-/*
-    KEY ONLY — SEPARATE GOOGLE SHEET
 
-    Sheet1 in this spreadsheet contains:
-    A = Flight_Date
-    B = From_Airport
-    C = To_Airport
-*/
+const MAIN_SHEET_GID =
+    "1815369779";
+
+
 const KEY_SPREADSHEET_ID =
     "1YgSFUzcBSBFgTrzr57MfodVff5-9P2qnvE3PNTicK7M";
 
 
 
-/*
-===========================================================
-EXPECTED GOOGLE SHEET COLUMNS
-===========================================================
-*/
+/* =========================================================
+   COLUMN POSITIONS
+========================================================= */
 
-const EXPECTED_HEADERS = [
+const COL = {
 
-    "Flight_Date",
+    FLIGHT_DATE: 0,
 
-    "From_Airport",
+    FROM: 1,
 
-    "To_Airport",
+    TO: 2,
 
-    "Total_Seats_Available",
+    TOTAL_AVAILABLE: 3,
 
-    "Total_NonRevs_Listed",
+    TOTAL_NONREVS: 4,
 
-    "First_Available",
+    FIRST_AVAILABLE: 5,
 
-    "First_NonRevs_Listed",
+    FIRST_NONREVS: 6,
 
-    "Main_Avilable",
+    MAIN_AVAILABLE: 7,
 
-    "Main_NonRevs_Listed",
+    MAIN_NONREVS: 8,
 
-    "Business_Available",
+    BUSINESS_AVAILABLE: 9,
 
-    "Business_NonRevs_Listed",
+    BUSINESS_NONREVS: 10,
 
-    "PremEcon_Available",
+    PREMIUM_AVAILABLE: 11,
 
-    "Prem_Econ_NonRevs_Listed",
+    PREMIUM_NONREVS: 12,
 
-    "Date_Data_Pulled"
+    DATA_PULLED: 13
 
-];
+};
 
 
-/*
-===========================================================
-PAGE ELEMENTS
-===========================================================
-*/
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
 const statusEl =
-    document.getElementById("status");
+    document.getElementById(
+        "status"
+    );
+
 
 const resultsEl =
-    document.getElementById("results");
+    document.getElementById(
+        "results"
+    );
+
+
+const diagnosticEl =
+    document.getElementById(
+        "diagnostic"
+    );
+
 
 const searchButton =
-    document.getElementById("searchButton");
+    document.getElementById(
+        "searchButton"
+    );
+
 
 const keyButton =
-    document.getElementById("keyButton");
+    document.getElementById(
+        "keyButton"
+    );
+
 
 const keyModal =
-    document.getElementById("keyModal");
+    document.getElementById(
+        "keyModal"
+    );
+
 
 const keyCloseButton =
-    document.getElementById("keyCloseButton");
+    document.getElementById(
+        "keyCloseButton"
+    );
+
 
 const keyContent =
-    document.getElementById("keyContent");
+    document.getElementById(
+        "keyContent"
+    );
 
 
 
-/*
-===========================================================
-AIRPORT INPUTS
-===========================================================
-*/
-
-document
-    .getElementById("fromAirport")
-    .addEventListener("input", function () {
-
-        this.value =
-            this.value
-                .toUpperCase()
-                .replace(/[^A-Z0-9]/g, "");
-
-    });
-
+/* =========================================================
+   AIRPORT INPUTS
+========================================================= */
 
 document
-    .getElementById("toAirport")
-    .addEventListener("input", function () {
+    .getElementById(
+        "fromAirport"
+    )
+    .addEventListener(
+        "input",
+        function() {
 
-        this.value =
-            this.value
-                .toUpperCase()
-                .replace(/[^A-Z0-9]/g, "");
-
-    });
-
-
-
-/*
-===========================================================
-KEY BUTTON — SHEET4
-===========================================================
-*/
-
-keyButton.addEventListener("click", async function () {
-
-    keyModal.classList.add("open");
-    keyModal.setAttribute("aria-hidden", "false");
-
-    keyContent.innerHTML =
-        '<div class="key-loading">Loading Sheet4...</div>';
-
-    try {
-
-        const rows = await querySheet4();
-
-        if (!rows.length) {
-
-            keyContent.innerHTML =
-                '<div class="key-empty">No data was found in Sheet4.</div>';
-
-            return;
-        }
-
-        keyContent.innerHTML = buildKeyTable(rows);
-
-    } catch (error) {
-
-        console.error(error);
-
-        keyContent.innerHTML =
-            '<div class="key-error">' +
-            'Unable to read Sheet4.<br><br>' +
-            escapeHTML(error.message || "Unknown Google Sheets error.") +
-            '<br><br>' +
-            'Make sure the KEY spreadsheet is shared as Anyone with the link → Viewer.' +
-            '</div>';
-
-    }
-
-});
-
-
-keyCloseButton.addEventListener("click", closeKey);
-
-
-keyModal.addEventListener("click", function (event) {
-
-    if (event.target === keyModal) {
-        closeKey();
-    }
-
-});
-
-
-document.addEventListener("keydown", function (event) {
-
-    if (event.key === "Escape") {
-        closeKey();
-    }
-
-});
-
-
-function closeKey() {
-
-    keyModal.classList.remove("open");
-    keyModal.setAttribute("aria-hidden", "true");
-
-}
-
-
-/*
-===========================================================
-READ FIRST 3 COLUMNS FROM SHEET4
-===========================================================
-*/
-
-function querySheet4() {
-
-    return new Promise(function(resolve, reject) {
-
-        /*
-            KEY DATA SOURCE ONLY
-
-            Spreadsheet:
-            1YgSFUzcBSBFgTrzr57MfodVff5-9P2qnvE3PNTicK7M
-
-            Sheet:
-            Sheet1
-
-            Columns:
-            A = Flight_Date
-            B = From_Airport
-            C = To_Airport
-        */
-
-        function runQuery() {
-
-            const dataSourceUrl =
-                "https://docs.google.com/spreadsheets/d/" +
-                KEY_SPREADSHEET_ID +
-                "/gviz/tq?sheet=Sheet1&headers=1";
-
-            const query =
-                new google.visualization.Query(
-                    dataSourceUrl
-                );
-
-            /*
-                Pull the first three columns only.
-            */
-            query.setQuery(
-                "select A, B, C"
-            );
-
-            query.setTimeout(15);
-
-            query.send(function(response) {
-
-                if (response.isError()) {
-
-                    reject(
-                        new Error(
-                            response.getMessage() +
-                            (
-                                response.getDetailedMessage()
-                                    ? " " +
-                                      response.getDetailedMessage()
-                                    : ""
-                            )
-                        )
+            this.value =
+                this.value
+                    .toUpperCase()
+                    .replace(
+                        /[^A-Z0-9]/g,
+                        ""
                     );
 
-                    return;
-                }
-
-                try {
-
-                    const data =
-                        response.getDataTable();
-
-                    const rows = [];
-
-                    for (
-                        let r = 0;
-                        r < data.getNumberOfRows();
-                        r++
-                    ) {
-
-                        const flightDate =
-                            data.getFormattedValue(r, 0);
-
-                        const fromAirport =
-                            data.getFormattedValue(r, 1);
-
-                        const toAirport =
-                            data.getFormattedValue(r, 2);
-
-                        /*
-                            Ignore completely blank rows.
-                        */
-
-                        if (
-                            flightDate === "" &&
-                            fromAirport === "" &&
-                            toAirport === ""
-                        ) {
-                            continue;
-                        }
-
-                        rows.push([
-                            flightDate,
-                            fromAirport,
-                            toAirport
-                        ]);
-
-                    }
-
-                    resolve(rows);
-
-                } catch (error) {
-
-                    reject(error);
-
-                }
-
-            });
-
         }
+    );
 
-
-        /*
-            Load Google's Visualization API.
-        */
-
-        if (
-            window.google &&
-            google.visualization &&
-            google.visualization.Query
-        ) {
-
-            runQuery();
-
-        } else {
-
-            google.charts.load("current");
-
-            google.charts.setOnLoadCallback(
-                runQuery
-            );
-
-        }
-
-    });
-
-}
-
-
-function getSheetCell(cell) {
-
-    if (!cell) return "";
-
-    if (
-        cell.f !== undefined &&
-        cell.f !== null
-    ) {
-        return cell.f;
-    }
-
-    if (
-        cell.v !== undefined &&
-        cell.v !== null
-    ) {
-        return cell.v;
-    }
-
-    return "";
-}
-
-
-/*
-===========================================================
-BUILD KEY TABLE
-===========================================================
-*/
-
-function buildKeyTable(rows) {
-
-    return `
-
-        <div class="key-table-wrap">
-
-            <table class="key-table">
-
-                <thead>
-                    <tr>
-                        <th>Flight Date</th>
-                        <th>From Airport</th>
-                        <th>To Airport</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    ${rows.map(function(row) {
-
-                        return `
-
-                            <tr>
-                                <td>${escapeHTML(row[0] || "—")}</td>
-                                <td>${escapeHTML(row[1] || "—")}</td>
-                                <td>${escapeHTML(row[2] || "—")}</td>
-                            </tr>
-
-                        `;
-
-                    }).join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    `;
-}
-
-
-/*
-===========================================================
-SEARCH
-===========================================================
-*/
 
 document
-    .getElementById("searchForm")
-    .addEventListener("submit", async function (event) {
+    .getElementById(
+        "toAirport"
+    )
+    .addEventListener(
+        "input",
+        function() {
 
-        event.preventDefault();
-
-        const date =
-            document
-                .getElementById("flightDate")
-                .value;
-
-        const from =
-            document
-                .getElementById("fromAirport")
-                .value
-                .trim()
-                .toUpperCase();
-
-        const to =
-            document
-                .getElementById("toAirport")
-                .value
-                .trim()
-                .toUpperCase();
-
-
-        if (!date || !from || !to) {
-            return;
-        }
-
-
-        searchButton.disabled = true;
-
-        statusEl.className = "";
-
-        statusEl.textContent =
-            "Searching Google Sheet...";
-
-        resultsEl.innerHTML = "";
-
-
-        try {
-
-            /*
-            Get rows matching the route.
-            */
-
-            const rows =
-                await queryGoogleSheet(from, to);
-
-
-            /*
-            Filter by:
-
-            Flight Date
-            From Airport
-            To Airport
-            */
-
-            const matches =
-                rows.filter(function (row) {
-
-                    return (
-
-                        normalizeDate(row[0]) === date
-
-                        &&
-
-                        normalizeAirport(row[1]) === from
-
-                        &&
-
-                        normalizeAirport(row[2]) === to
-
+            this.value =
+                this.value
+                    .toUpperCase()
+                    .replace(
+                        /[^A-Z0-9]/g,
+                        ""
                     );
 
-                });
+        }
+    );
 
 
-            /*
-            =================================================
-            SORT BY DATE_DATA_PULLED
-            =================================================
 
-            Column 14 = Date_Data_Pulled
+/* =========================================================
+   MAIN SEARCH
+========================================================= */
 
-            Most recent date appears FIRST.
+document
+    .getElementById(
+        "searchForm"
+    )
+    .addEventListener(
+        "submit",
+        async function(event) {
 
-            Example:
-
-            08/17/2026
-            08/16/2026
-            08/15/2026
-            08/14/2026
-            */
-
-            matches.sort(function (a, b) {
-
-                return (
-
-                    parsePulledDate(b[13])
-
-                    -
-
-                    parsePulledDate(a[13])
-
-                );
-
-            });
+            event.preventDefault();
 
 
-            searchButton.disabled = false;
+            const inputDate =
+                document
+                    .getElementById(
+                        "flightDate"
+                    )
+                    .value;
 
 
-            /*
-            No results
-            */
+            const from =
+                document
+                    .getElementById(
+                        "fromAirport"
+                    )
+                    .value
+                    .trim()
+                    .toUpperCase();
 
-            if (matches.length === 0) {
 
-                statusEl.textContent =
-                    "No matching flight data was found.";
+            const to =
+                document
+                    .getElementById(
+                        "toAirport"
+                    )
+                    .value
+                    .trim()
+                    .toUpperCase();
+
+
+            if (
+                !inputDate ||
+                !from ||
+                !to
+            ) {
 
                 return;
 
             }
 
 
-            /*
-            Results found
-            */
+            searchButton.disabled =
+                true;
 
-            statusEl.textContent =
-                matches.length +
-                " matching record" +
-                (matches.length === 1 ? "" : "s") +
-                " found.";
-
-
-            /*
-            Display results
-            */
-
-            resultsEl.innerHTML =
-                matches
-                    .map(buildResult)
-                    .join("");
-
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            searchButton.disabled = false;
 
             statusEl.className =
-                "error";
+                "";
+
 
             statusEl.textContent =
-                "Unable to read the Google Sheet. " +
-                "Make sure the sheet is shared as " +
-                "Anyone with the link → Viewer.";
+                "Loading flight data...";
+
+
+            resultsEl.innerHTML =
+                "";
+
+
+            diagnosticEl.innerHTML =
+                "";
+
+
+            try {
+
+
+                /*
+                 * Load the actual worksheet CSV.
+                 */
+
+                const rows =
+                    await queryGoogleSheet();
+
+
+                console.log(
+                    "================================"
+                );
+
+                console.log(
+                    "TOTAL ROWS LOADED:",
+                    rows.length
+                );
+
+                console.log(
+                    "================================"
+                );
+
+
+                /*
+                 * Parse requested date.
+                 */
+
+                const requestedDate =
+                    parseDateParts(
+                        inputDate
+                    );
+
+
+                /*
+                 * Find route matches.
+                 */
+
+                const routeMatches =
+                    rows.filter(
+                        function(row) {
+
+
+                            const rowFrom =
+                                normalizeAirport(
+                                    row[
+                                        COL.FROM
+                                    ]
+                                );
+
+
+                            const rowTo =
+                                normalizeAirport(
+                                    row[
+                                        COL.TO
+                                    ]
+                                );
+
+
+                            return (
+
+                                rowFrom === from &&
+
+                                rowTo === to
+
+                            );
+
+                        }
+                    );
+
+
+                console.log(
+                    "ROUTE MATCHES:",
+                    routeMatches.length
+                );
+
+
+                /*
+                 * Debug table.
+                 */
+
+                let debugRows = "";
+
+
+                routeMatches.forEach(
+                    function(row, index) {
+
+
+                        const rawDate =
+                            row[
+                                COL.FLIGHT_DATE
+                            ];
+
+
+                        const parsedDate =
+                            parseDateParts(
+                                rawDate
+                            );
+
+
+                        const match =
+                            datesEqual(
+                                parsedDate,
+                                requestedDate
+                            );
+
+
+                        console.log(
+                            "ROUTE RECORD",
+                            index + 1,
+                            {
+                                rawDate:
+                                    rawDate,
+
+                                parsedDate:
+                                    parsedDate,
+
+                                from:
+                                    row[
+                                        COL.FROM
+                                    ],
+
+                                to:
+                                    row[
+                                        COL.TO
+                                    ],
+
+                                pulled:
+                                    row[
+                                        COL.DATA_PULLED
+                                    ],
+
+                                match:
+                                    match
+                            }
+                        );
+
+
+                        debugRows += `
+
+                            <tr>
+
+                                <td>
+                                    ${index + 1}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        rawDate
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        formatDateParts(
+                                            parsedDate
+                                        )
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        row[
+                                            COL.DATA_PULLED
+                                        ] || ""
+                                    )}
+                                </td>
+
+                                <td>
+
+                                    ${
+                                        match
+                                            ? "YES"
+                                            : "NO"
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                );
+
+
+                /*
+                 * Final matches.
+                 */
+
+                const matches =
+                    routeMatches.filter(
+                        function(row) {
+
+
+                            const rowDate =
+                                parseDateParts(
+                                    row[
+                                        COL.FLIGHT_DATE
+                                    ]
+                                );
+
+
+                            return datesEqual(
+                                rowDate,
+                                requestedDate
+                            );
+
+                        }
+                    );
+
+
+                /*
+                 * Newest data pull first.
+                 */
+
+                matches.sort(
+                    function(a, b) {
+
+                        return (
+
+                            compareDates(
+                                b[
+                                    COL.DATA_PULLED
+                                ],
+                                a[
+                                    COL.DATA_PULLED
+                                ]
+                            )
+
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Diagnostic.
+                 */
+
+                diagnosticEl.innerHTML = `
+
+                    <div class="diagnostic">
+
+                        <div class="diagnostic-title">
+
+                            Search Diagnostics
+
+                        </div>
+
+
+                        Spreadsheet rows loaded:
+
+                        <strong>
+                            ${rows.length}
+                        </strong>
+
+                        <br>
+
+
+                        ${escapeHTML(from)}
+                        →
+                        ${escapeHTML(to)}
+                        route records:
+
+                        <strong>
+                            ${routeMatches.length}
+                        </strong>
+
+                        <br>
+
+
+                        Requested date:
+
+                        <strong>
+                            ${escapeHTML(
+                                formatDateParts(
+                                    requestedDate
+                                )
+                            )}
+                        </strong>
+
+                        <br>
+
+
+                        Matching records:
+
+                        <strong>
+                            ${matches.length}
+                        </strong>
+
+
+                        <div class="route-debug">
+
+                            <table>
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            #
+                                        </th>
+
+                                        <th>
+                                            Raw Sheet Date
+                                        </th>
+
+                                        <th>
+                                            Parsed Date
+                                        </th>
+
+                                        <th>
+                                            Data Pulled
+                                        </th>
+
+                                        <th>
+                                            Match
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    ${debugRows}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                searchButton.disabled =
+                    false;
+
+
+                /*
+                 * No matches.
+                 */
+
+                if (
+                    matches.length === 0
+                ) {
+
+                    statusEl.textContent =
+                        "No matching flight data was found.";
+
+                    return;
+
+                }
+
+
+                /*
+                 * Status.
+                 */
+
+                statusEl.textContent =
+
+                    matches.length +
+
+                    " matching record" +
+
+                    (
+                        matches.length === 1
+                            ? ""
+                            : "s"
+                    ) +
+
+                    " found.";
+
+
+                /*
+                 * Results.
+                 */
+
+                resultsEl.innerHTML =
+
+                    matches
+                        .map(
+                            buildResult
+                        )
+                        .join("");
+
+
+            }
+
+
+            catch(error) {
+
+
+                console.error(
+                    "SEARCH ERROR:",
+                    error
+                );
+
+
+                searchButton.disabled =
+                    false;
+
+
+                statusEl.className =
+                    "error";
+
+
+                statusEl.textContent =
+
+                    "Unable to read the Google Sheet: " +
+
+                    (
+                        error.message ||
+                        "Unknown error."
+                    );
+
+            }
 
         }
+    );
 
-    });
 
 
-/*
-===========================================================
-QUERY GOOGLE SHEET
-===========================================================
-*/
+/* =========================================================
+   GET MAIN SHEET
+========================================================= */
 
-function queryGoogleSheet(from, to) {
+async function queryGoogleSheet() {
+
 
     /*
-    Only request rows for the selected route.
-
-    Column B = From_Airport
-    Column C = To_Airport
-    */
-
-    const query =
-
-        "select * where B = '" +
-
-        escapeQuery(from) +
-
-        "' and C = '" +
-
-        escapeQuery(to) +
-
-        "'";
-
-
-    const params =
-
-        "tqx=" +
-
-        encodeURIComponent(
-            "out:json;responseHandler:googleSheetCallback"
-        )
-
-        +
-
-        "&tq=" +
-
-        encodeURIComponent(query);
-
+     * IMPORTANT:
+     *
+     * We are now using Google's direct
+     * spreadsheet export endpoint.
+     *
+     * NOT the gviz endpoint.
+     */
 
     const url =
 
@@ -1063,375 +1358,720 @@ function queryGoogleSheet(from, to) {
 
         SPREADSHEET_ID +
 
-        "/gviz/tq?" +
+        "/export?format=csv&gid=" +
 
-        params;
-
-
-    return new Promise(function (resolve, reject) {
-
-        const callbackName =
-            "googleSheetCallback";
+        MAIN_SHEET_GID;
 
 
-        window[callbackName] =
-            function (data) {
-
-                try {
-
-                    delete window[callbackName];
+    console.log(
+        "GOOGLE SHEET EXPORT URL:",
+        url
+    );
 
 
-                    if (
-                        !data ||
-                        !data.table ||
-                        !data.table.rows
-                    ) {
-
-                        reject(
-                            new Error(
-                                "Invalid Google Sheet response."
-                            )
-                        );
-
-                        return;
-
-                    }
+    const response =
+        await fetch(
+            url,
+            {
+                cache: "no-store"
+            }
+        );
 
 
-                    const rows =
+    if (
+        !response.ok
+    ) {
 
-                        data.table.rows.map(
-                            function (row) {
+        throw new Error(
 
-                                const cells =
-                                    row.c || [];
+            "Google Sheet returned HTTP " +
 
+            response.status
 
-                                return cells.map(
-                                    function (cell) {
+        );
 
-                                        if (!cell) {
-                                            return "";
-                                        }
+    }
 
 
-                                        return cell.f !== undefined
-                                            ? cell.f
-                                            : cell.v;
-
-                                    }
-                                );
-
-                            }
-                        );
+    const csv =
+        await response.text();
 
 
-                    resolve(rows);
+    console.log(
+        "CSV CHARACTER COUNT:",
+        csv.length
+    );
+
+
+    if (
+        !csv ||
+        csv.trim() === ""
+    ) {
+
+        throw new Error(
+            "Google Sheet returned no data."
+        );
+
+    }
+
+
+    const rows =
+        parseCSV(
+            csv
+        );
+
+
+    console.log(
+        "RAW CSV ROW COUNT:",
+        rows.length
+    );
+
+
+    /*
+     * First row is the header.
+     */
+
+    const dataRows =
+        rows
+            .slice(1)
+            .filter(
+                function(row) {
+
+                    return row.some(
+                        function(value) {
+
+                            return (
+
+                                String(value)
+                                    .trim() !== ""
+
+                            );
+
+                        }
+                    );
 
                 }
-
-                catch (error) {
-
-                    reject(error);
-
-                }
-
-                finally {
-
-                    if (script) {
-                        script.remove();
-                    }
-
-                }
-
-            };
+            );
 
 
-        const script =
-            document.createElement("script");
+    /*
+     * Log every row so we can see
+     * exactly what the export contains.
+     */
+
+    console.log(
+        "DATA ROWS:"
+    );
 
 
-        script.src = url;
+    dataRows.forEach(
+        function(row, index) {
+
+            console.log(
+                "ROW",
+                index + 1,
+                row
+            );
+
+        }
+    );
 
 
-        script.onerror =
-            function () {
-
-                delete window[callbackName];
-
-                script.remove();
-
-                reject(
-                    new Error(
-                        "Google Sheet request failed."
-                    )
-                );
-
-            };
-
-
-        document.head.appendChild(script);
-
-    });
+    return dataRows;
 
 }
 
 
-/*
-===========================================================
-ESCAPE GOOGLE QUERY
-===========================================================
-*/
 
-function escapeQuery(value) {
+/* =========================================================
+   DATE PARSER
+========================================================= */
 
-    return String(value)
-        .replace(/'/g, "''");
+function parseDateParts(
+    value
+) {
 
-}
-
-
-/*
-===========================================================
-NORMALIZE AIRPORT
-===========================================================
-*/
-
-function normalizeAirport(value) {
-
-    return String(value || "")
-        .trim()
-        .toUpperCase();
-
-}
-
-
-/*
-===========================================================
-NORMALIZE FLIGHT DATE
-===========================================================
-*/
-
-function normalizeDate(value) {
-
-    if (!value) {
-        return "";
-    }
-
-
-    const s =
-        String(value).trim();
-
-
-    /*
-    MM/DD/YYYY
-    */
-
-    let match =
-        s.match(
-            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
-        );
-
-
-    if (match) {
-
-        const month =
-            match[1].padStart(2, "0");
-
-        const day =
-            match[2].padStart(2, "0");
-
-        return (
-
-            match[3] +
-
-            "-" +
-
-            month +
-
-            "-" +
-
-            day
-
-        );
-
-    }
-
-
-    /*
-    MM-DD-YYYY
-    */
-
-    match =
-        s.match(
-            /^(\d{1,2})-(\d{1,2})-(\d{4})$/
-        );
-
-
-    if (match) {
-
-        const month =
-            match[1].padStart(2, "0");
-
-        const day =
-            match[2].padStart(2, "0");
-
-        return (
-
-            match[3] +
-
-            "-" +
-
-            month +
-
-            "-" +
-
-            day
-
-        );
-
-    }
-
-
-    /*
-    YYYY-MM-DD
-    */
-
-    match =
-        s.match(
-            /^(\d{4})-(\d{1,2})-(\d{1,2})/
-        );
-
-
-    if (match) {
-
-        return (
-
-            match[1] +
-
-            "-" +
-
-            match[2].padStart(2, "0") +
-
-            "-" +
-
-            match[3].padStart(2, "0")
-
-        );
-
-    }
-
-
-    return s;
-
-}
-
-
-/*
-===========================================================
-PARSE DATE_DATA_PULLED
-===========================================================
-
-The Google Sheet will contain dates like:
-
-08/17/2026
-08/16/2026
-08/15/2026
-
-This function converts them into numbers so JavaScript
-can correctly sort newest → oldest.
-===========================================================
-*/
-
-function parsePulledDate(value) {
-
-    if (!value) {
-        return 0;
-    }
-
-
-    const s =
-        String(value).trim();
-
-
-    /*
-    MM/DD/YYYY
-    */
-
-    let match =
-        s.match(
-            /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
-        );
-
-
-    if (match) {
-
-        return new Date(
-
-            Number(match[3]),
-
-            Number(match[1]) - 1,
-
-            Number(match[2])
-
-        ).getTime();
-
-    }
-
-
-    /*
-    YYYY-MM-DD
-    */
-
-    match =
-        s.match(
-            /^(\d{4})-(\d{1,2})-(\d{1,2})/
-        );
-
-
-    if (match) {
-
-        return new Date(
-
-            Number(match[1]),
-
-            Number(match[2]) - 1,
-
-            Number(match[3])
-
-        ).getTime();
-
-    }
-
-
-    /*
-    Fallback
-    */
-
-    const parsed =
-        Date.parse(s);
-
-
-    return Number.isNaN(parsed)
-        ? 0
-        : parsed;
-
-}
-
-
-/*
-===========================================================
-NUMBER DISPLAY
-===========================================================
-*/
-
-function numberOrDash(value) {
 
     if (
         value === null ||
+        value === undefined
+    ) {
+
+        return null;
+
+    }
+
+
+    let s =
+        String(value)
+            .trim();
+
+
+    /*
+     * Remove BOM.
+     */
+
+    s =
+        s.replace(
+            /^\uFEFF/,
+            ""
+        );
+
+
+    /*
+     * Remove surrounding quotes.
+     */
+
+    s =
+        s.replace(
+            /^"(.*)"$/,
+            "$1"
+        );
+
+
+    /*
+     * Google Date format:
+     *
+     * Date(2026,9,2)
+     */
+
+    let match =
+        s.match(
+            /Date\s*\(\s*(\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})/
+        );
+
+
+    if (
+        match
+    ) {
+
+        return {
+
+            year:
+                Number(
+                    match[1]
+                ),
+
+            month:
+                Number(
+                    match[2]
+                ) + 1,
+
+            day:
+                Number(
+                    match[3]
+                )
+
+        };
+
+    }
+
+
+    /*
+     * YYYY-MM-DD
+     */
+
+    match =
+        s.match(
+            /(\d{4})\s*[-\/.]\s*(\d{1,2})\s*[-\/.]\s*(\d{1,2})/
+        );
+
+
+    if (
+        match
+    ) {
+
+        return {
+
+            year:
+                Number(
+                    match[1]
+                ),
+
+            month:
+                Number(
+                    match[2]
+                ),
+
+            day:
+                Number(
+                    match[3]
+                )
+
+        };
+
+    }
+
+
+    /*
+     * MM/DD/YYYY
+     */
+
+    match =
+        s.match(
+            /(\d{1,2})\s*[-\/.]\s*(\d{1,2})\s*[-\/.]\s*(\d{4})/
+        );
+
+
+    if (
+        match
+    ) {
+
+        return {
+
+            year:
+                Number(
+                    match[3]
+                ),
+
+            month:
+                Number(
+                    match[1]
+                ),
+
+            day:
+                Number(
+                    match[2]
+                )
+
+        };
+
+    }
+
+
+    /*
+     * Embedded date.
+     */
+
+    match =
+        s.match(
+            /(\d{1,2})\D+(\d{1,2})\D+(\d{4})/
+        );
+
+
+    if (
+        match
+    ) {
+
+        return {
+
+            year:
+                Number(
+                    match[3]
+                ),
+
+            month:
+                Number(
+                    match[1]
+                ),
+
+            day:
+                Number(
+                    match[2]
+                )
+
+        };
+
+    }
+
+
+    return null;
+
+}
+
+
+
+/* =========================================================
+   DATE EQUALITY
+========================================================= */
+
+function datesEqual(
+    a,
+    b
+) {
+
+
+    if (
+        !a ||
+        !b
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+
+        Number(a.year) ===
+        Number(b.year)
+
+        &&
+
+        Number(a.month) ===
+        Number(b.month)
+
+        &&
+
+        Number(a.day) ===
+        Number(b.day)
+
+    );
+
+}
+
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDateParts(
+    date
+) {
+
+
+    if (
+        !date
+    ) {
+
+        return "UNABLE TO PARSE";
+
+    }
+
+
+    return (
+
+        String(
+            date.month
+        ).padStart(
+            2,
+            "0"
+        )
+
+        +
+
+        "/"
+
+        +
+
+        String(
+            date.day
+        ).padStart(
+            2,
+            "0"
+        )
+
+        +
+
+        "/"
+
+        +
+
+        String(
+            date.year
+        )
+
+    );
+
+}
+
+
+
+/* =========================================================
+   DATE SORTING
+========================================================= */
+
+function compareDates(
+    a,
+    b
+) {
+
+
+    const dateA =
+        parseDateParts(
+            a
+        );
+
+
+    const dateB =
+        parseDateParts(
+            b
+        );
+
+
+    if (
+        !dateA &&
+        !dateB
+    ) {
+
+        return 0;
+
+    }
+
+
+    if (
+        !dateA
+    ) {
+
+        return -1;
+
+    }
+
+
+    if (
+        !dateB
+    ) {
+
+        return 1;
+
+    }
+
+
+    const keyA =
+
+        dateA.year * 10000 +
+
+        dateA.month * 100 +
+
+        dateA.day;
+
+
+    const keyB =
+
+        dateB.year * 10000 +
+
+        dateB.month * 100 +
+
+        dateB.day;
+
+
+    return keyA - keyB;
+
+}
+
+
+
+/* =========================================================
+   AIRPORT NORMALIZATION
+========================================================= */
+
+function normalizeAirport(
+    value
+) {
+
+
+    return String(
+        value || ""
+    )
+        .trim()
+        .toUpperCase()
+        .replace(
+            /\s+/g,
+            ""
+        );
+
+}
+
+
+
+/* =========================================================
+   CSV PARSER
+========================================================= */
+
+function parseCSV(
+    text
+) {
+
+
+    const rows = [];
+
+    let row = [];
+
+    let value = "";
+
+    let insideQuotes =
+        false;
+
+
+    for (
+        let i = 0;
+        i < text.length;
+        i++
+    ) {
+
+
+        const char =
+            text[i];
+
+
+        const nextChar =
+            text[i + 1];
+
+
+        /*
+         * Quote.
+         */
+
+        if (
+            char === '"'
+        ) {
+
+
+            /*
+             * Escaped quote.
+             */
+
+            if (
+
+                insideQuotes &&
+
+                nextChar === '"'
+
+            ) {
+
+                value += '"';
+
+                i++;
+
+                continue;
+
+            }
+
+
+            insideQuotes =
+                !insideQuotes;
+
+            continue;
+
+        }
+
+
+        /*
+         * Comma.
+         */
+
+        if (
+
+            char === "," &&
+
+            !insideQuotes
+
+        ) {
+
+            row.push(
+                value
+            );
+
+            value = "";
+
+            continue;
+
+        }
+
+
+        /*
+         * New line.
+         */
+
+        if (
+
+            (
+                char === "\n" ||
+                char === "\r"
+            )
+
+            &&
+
+            !insideQuotes
+
+        ) {
+
+
+            if (
+
+                char === "\r" &&
+
+                nextChar === "\n"
+
+            ) {
+
+                i++;
+
+            }
+
+
+            row.push(
+                value
+            );
+
+
+            rows.push(
+                row
+            );
+
+
+            row = [];
+
+            value = "";
+
+            continue;
+
+        }
+
+
+        value += char;
+
+    }
+
+
+    /*
+     * Final row.
+     */
+
+    if (
+
+        value !== "" ||
+
+        row.length > 0
+
+    ) {
+
+        row.push(
+            value
+        );
+
+
+        rows.push(
+            row
+        );
+
+    }
+
+
+    return rows;
+
+}
+
+
+
+/* =========================================================
+   NUMBER DISPLAY
+========================================================= */
+
+function numberOrDash(
+    value
+) {
+
+
+    if (
+
+        value === null ||
+
         value === undefined ||
-        value === ""
+
+        String(value).trim() === ""
+
     ) {
 
         return "—";
@@ -1444,34 +2084,54 @@ function numberOrDash(value) {
 }
 
 
-/*
-===========================================================
-BUILD RESULT
-===========================================================
-*/
 
-function buildResult(row) {
+/* =========================================================
+   BUILD RESULT
+========================================================= */
+
+function buildResult(
+    row
+) {
+
 
     const flightDate =
-        row[0] || "";
+        row[
+            COL.FLIGHT_DATE
+        ] || "";
+
 
     const from =
-        row[1] || "";
+        row[
+            COL.FROM
+        ] || "";
+
 
     const to =
-        row[2] || "";
+        row[
+            COL.TO
+        ] || "";
 
 
     const totalAvailable =
-        numberOrDash(row[3]);
+        numberOrDash(
+            row[
+                COL.TOTAL_AVAILABLE
+            ]
+        );
+
 
     const totalNonRevs =
-        numberOrDash(row[4]);
+        numberOrDash(
+            row[
+                COL.TOTAL_NONREVS
+            ]
+        );
 
 
     return `
 
         <div class="result">
+
 
             <div class="route">
 
@@ -1479,15 +2139,24 @@ function buildResult(row) {
 
                     <div class="route-title">
 
-                        ${escapeHTML(from)}
+                        ${escapeHTML(
+                            from
+                        )}
+
                         →
-                        ${escapeHTML(to)}
+
+                        ${escapeHTML(
+                            to
+                        )}
 
                     </div>
 
+
                     <div class="route-date">
 
-                        ${escapeHTML(flightDate)}
+                        ${escapeHTML(
+                            flightDate
+                        )}
 
                     </div>
 
@@ -1496,7 +2165,9 @@ function buildResult(row) {
             </div>
 
 
+
             <div class="stats">
+
 
                 <div class="stat">
 
@@ -1506,13 +2177,17 @@ function buildResult(row) {
 
                     </div>
 
+
                     <div class="stat-value">
 
-                        ${escapeHTML(totalAvailable)}
+                        ${escapeHTML(
+                            totalAvailable
+                        )}
 
                     </div>
 
                 </div>
+
 
 
                 <div class="stat">
@@ -1523,28 +2198,40 @@ function buildResult(row) {
 
                     </div>
 
+
                     <div class="stat-value">
 
-                        ${escapeHTML(totalNonRevs)}
+                        ${escapeHTML(
+                            totalNonRevs
+                        )}
 
                     </div>
 
                 </div>
 
+
             </div>
 
 
+
             <table class="availability">
+
 
                 <thead>
 
                     <tr>
 
-                        <th>Cabin</th>
+                        <th>
+                            Cabin
+                        </th>
 
-                        <th>Available</th>
+                        <th>
+                            Available
+                        </th>
 
-                        <th>Non-Revs Listed</th>
+                        <th>
+                            Non-Revs Listed
+                        </th>
 
                     </tr>
 
@@ -1553,103 +2240,172 @@ function buildResult(row) {
 
                 <tbody>
 
+
                     <tr>
 
-                        <td>First</td>
-
                         <td>
-                            ${escapeHTML(
-                                numberOrDash(row[5])
-                            )}
+                            First
                         </td>
 
                         <td>
+
                             ${escapeHTML(
-                                numberOrDash(row[6])
+                                numberOrDash(
+                                    row[
+                                        COL.FIRST_AVAILABLE
+                                    ]
+                                )
                             )}
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHTML(
+                                numberOrDash(
+                                    row[
+                                        COL.FIRST_NONREVS
+                                    ]
+                                )
+                            )}
+
                         </td>
 
                     </tr>
 
 
+
                     <tr>
 
-                        <td>Main</td>
-
                         <td>
-                            ${escapeHTML(
-                                numberOrDash(row[7])
-                            )}
+                            Main
                         </td>
 
                         <td>
+
                             ${escapeHTML(
-                                numberOrDash(row[8])
+                                numberOrDash(
+                                    row[
+                                        COL.MAIN_AVAILABLE
+                                    ]
+                                )
                             )}
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHTML(
+                                numberOrDash(
+                                    row[
+                                        COL.MAIN_NONREVS
+                                    ]
+                                )
+                            )}
+
                         </td>
 
                     </tr>
 
 
+
                     <tr>
 
-                        <td>Business</td>
-
                         <td>
-                            ${escapeHTML(
-                                numberOrDash(row[9])
-                            )}
+                            Business
                         </td>
 
                         <td>
+
                             ${escapeHTML(
-                                numberOrDash(row[10])
+                                numberOrDash(
+                                    row[
+                                        COL.BUSINESS_AVAILABLE
+                                    ]
+                                )
                             )}
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHTML(
+                                numberOrDash(
+                                    row[
+                                        COL.BUSINESS_NONREVS
+                                    ]
+                                )
+                            )}
+
                         </td>
 
                     </tr>
 
 
+
                     <tr>
 
-                        <td>Premium Economy</td>
-
                         <td>
-                            ${escapeHTML(
-                                numberOrDash(row[11])
-                            )}
+                            Premium Economy
                         </td>
 
                         <td>
+
                             ${escapeHTML(
-                                numberOrDash(row[12])
+                                numberOrDash(
+                                    row[
+                                        COL.PREMIUM_AVAILABLE
+                                    ]
+                                )
                             )}
+
+                        </td>
+
+                        <td>
+
+                            ${escapeHTML(
+                                numberOrDash(
+                                    row[
+                                        COL.PREMIUM_NONREVS
+                                    ]
+                                )
+                            )}
+
                         </td>
 
                     </tr>
 
 
+
                     <tr>
 
-                        <td>TOTAL</td>
+                        <td>
+                            TOTAL
+                        </td>
 
                         <td>
+
                             ${escapeHTML(
                                 totalAvailable
                             )}
+
                         </td>
 
                         <td>
+
                             ${escapeHTML(
                                 totalNonRevs
                             )}
+
                         </td>
 
                     </tr>
+
 
                 </tbody>
 
             </table>
+
 
 
             <div class="pulled">
@@ -1657,50 +2413,110 @@ function buildResult(row) {
                 Data Pulled:
 
                 <strong>
+
                     ${escapeHTML(
-                        row[13] || "—"
+                        row[
+                            COL.DATA_PULLED
+                        ] || "—"
                     )}
+
                 </strong>
 
             </div>
 
 
+
             <details class="raw-data">
 
                 <summary>
+
                     Show all spreadsheet information
+
                 </summary>
 
 
                 <div class="raw-grid">
 
-                    ${EXPECTED_HEADERS
-                        .map(function (header, index) {
 
-                            return `
+                    ${
 
-                                <div class="raw-item">
+                        [
 
-                                    <strong>
-                                        ${escapeHTML(header)}
-                                    </strong>
+                            "Flight_Date",
 
-                                    ${escapeHTML(
-                                        numberOrDash(
-                                            row[index]
-                                        )
-                                    )}
+                            "From_Airport",
 
-                                </div>
+                            "To_Airport",
 
-                            `;
+                            "Total_Seats_Available",
 
-                        })
-                        .join("")}
+                            "Total_NonRevs_Listed",
+
+                            "First_Available",
+
+                            "First_NonRevs_Listed",
+
+                            "Main_Avilable",
+
+                            "Main_NonRevs_Listed",
+
+                            "Business_Available",
+
+                            "Business_NonRevs_Listed",
+
+                            "PremEcon_Available",
+
+                            "Prem_Econ_NonRevs_Listed",
+
+                            "Date_Data_Pulled"
+
+                        ]
+
+                        .map(
+                            function(
+                                header,
+                                index
+                            ) {
+
+
+                                return `
+
+                                    <div class="raw-item">
+
+                                        <strong>
+
+                                            ${escapeHTML(
+                                                header
+                                            )}
+
+                                        </strong>
+
+
+                                        ${escapeHTML(
+
+                                            numberOrDash(
+                                                row[index]
+                                            )
+
+                                        )}
+
+                                    </div>
+
+                                `;
+
+                            }
+                        )
+
+                        .join("")
+
+                    }
+
 
                 </div>
 
+
             </details>
+
 
         </div>
 
@@ -1709,29 +2525,358 @@ function buildResult(row) {
 }
 
 
-/*
-===========================================================
-HTML ESCAPE
-===========================================================
-*/
 
-function escapeHTML(value) {
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
-    return String(value ?? "")
+function escapeHTML(
+    value
+) {
 
-        .replace(/&/g, "&amp;")
 
-        .replace(/</g, "&lt;")
+    return String(
+        value ?? ""
+    )
 
-        .replace(/>/g, "&gt;")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
 
-        .replace(/"/g, "&quot;")
+        .replace(
+            /</g,
+            "&lt;"
+        )
 
-        .replace(/'/g, "&#039;");
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================================================
+   KEY MODAL
+========================================================= */
+
+keyButton.addEventListener(
+    "click",
+    async function() {
+
+
+        keyModal.classList.add(
+            "open"
+        );
+
+
+        keyModal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+        keyContent.innerHTML =
+            '<div class="key-loading">' +
+            'Loading Sheet1...' +
+            '</div>';
+
+
+        try {
+
+
+            const rows =
+                await queryKeySheet();
+
+
+            if (
+                rows.length === 0
+            ) {
+
+                keyContent.innerHTML =
+                    '<div class="key-empty">' +
+                    'No data was found in Sheet1.' +
+                    '</div>';
+
+                return;
+
+            }
+
+
+            keyContent.innerHTML =
+                buildKeyTable(
+                    rows
+                );
+
+        }
+
+
+        catch(error) {
+
+
+            console.error(
+                "KEY ERROR:",
+                error
+            );
+
+
+            keyContent.innerHTML =
+
+                '<div class="key-error">' +
+
+                'Unable to read the Key spreadsheet.' +
+
+                '<br><br>' +
+
+                escapeHTML(
+                    error.message ||
+                    "Unknown error."
+                ) +
+
+                '</div>';
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   CLOSE KEY
+========================================================= */
+
+keyCloseButton.addEventListener(
+    "click",
+    closeKey
+);
+
+
+keyModal.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target === keyModal
+        ) {
+
+            closeKey();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeKey();
+
+        }
+
+    }
+);
+
+
+function closeKey() {
+
+    keyModal.classList.remove(
+        "open"
+    );
+
+    keyModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+}
+
+
+
+/* =========================================================
+   KEY SHEET
+========================================================= */
+
+async function queryKeySheet() {
+
+
+    const url =
+
+        "https://docs.google.com/spreadsheets/d/" +
+
+        KEY_SPREADSHEET_ID +
+
+        "/gviz/tq?sheet=Sheet1&headers=1&tqx=out:csv";
+
+
+    const response =
+        await fetch(
+            url
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            "Key spreadsheet returned HTTP " +
+            response.status
+        );
+
+    }
+
+
+    const csv =
+        await response.text();
+
+
+    const rows =
+        parseCSV(
+            csv
+        );
+
+
+    return rows
+        .slice(1)
+        .filter(
+            function(row) {
+
+                return row.some(
+                    function(value) {
+
+                        return (
+                            String(value)
+                                .trim() !== ""
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+
+/* =========================================================
+   KEY TABLE
+========================================================= */
+
+function buildKeyTable(
+    rows
+) {
+
+
+    return `
+
+        <div class="key-table-wrap">
+
+            <table class="key-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Flight Date
+                        </th>
+
+                        <th>
+                            From Airport
+                        </th>
+
+                        <th>
+                            To Airport
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    ${
+
+                        rows
+                            .map(
+                                function(row) {
+
+                                    return `
+
+                                        <tr>
+
+                                            <td>
+
+                                                ${escapeHTML(
+                                                    row[0] || "—"
+                                                )}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                ${escapeHTML(
+                                                    row[1] || "—"
+                                                )}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                ${escapeHTML(
+                                                    row[2] || "—"
+                                                )}
+
+                                            </td>
+
+                                        </tr>
+
+                                    `;
+
+                                }
+                            )
+                            .join("")
+
+                    }
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
 
 }
 
 </script>
 
+
 </body>
+
 </html>
