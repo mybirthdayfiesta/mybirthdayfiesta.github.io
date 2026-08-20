@@ -368,17 +368,6 @@ function searchFlights() {
         return;
     }
 
-    /*
-     * Sort by Flight_Date with the most recent flight first.
-     * Handles common date formats such as:
-     *   2026-08-20
-     *   8/20/2026
-     *   08/20/2026
-     */
-    matches.sort(function(a, b) {
-        return parseFlightDate(b[0]) - parseFlightDate(a[0]);
-    });
-
     results.innerHTML =
         matches
             .map(function(row) {
@@ -417,55 +406,6 @@ function normalizeDay(value) {
             return match.toUpperCase();
         });
 
-}
-
-
-/*
-=========================================================
-FLIGHT DATE SORTING
-=========================================================
-*/
-function parseFlightDate(value) {
-
-    const text = String(value || "").trim();
-
-    if (!text) {
-        return 0;
-    }
-
-    /*
-     * YYYY-MM-DD
-     */
-    let match = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
-
-    if (match) {
-        return new Date(
-            Number(match[1]),
-            Number(match[2]) - 1,
-            Number(match[3])
-        ).getTime();
-    }
-
-    /*
-     * M/D/YYYY or MM/DD/YYYY
-     */
-    match = text.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
-
-    if (match) {
-        return new Date(
-            Number(match[3]),
-            Number(match[1]) - 1,
-            Number(match[2])
-        ).getTime();
-    }
-
-    /*
-     * Fall back to JavaScript's date parser for other
-     * recognizable date formats.
-     */
-    const parsed = new Date(text).getTime();
-
-    return Number.isNaN(parsed) ? 0 : parsed;
 }
 
 
