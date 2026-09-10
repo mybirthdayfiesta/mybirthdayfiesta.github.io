@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111111">
+  <meta name="description" content="Mouth Full South — fresh seafood, juicy burgers, wings, chicken sandwiches, loaded fries and Southern-style sides.">
+  <title>Mouth Full South | Fresh Food Truck</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --ink:#111111;
+      --paper:#fff9ef;
+      --cream:#f5ead7;
+      --hot:#f04a2d;
+      --gold:#ffb21c;
+      --green:#557b4c;
+      --white:#ffffff;
+      --muted:#6e665d;
+      --shadow:0 18px 45px rgba(0,0,0,.15);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:var(--paper);
+      color:var(--ink);
+      font-family:"DM Sans",system-ui,sans-serif;
+      overflow-x:hidden;
+    }
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
+    button{font:inherit}
+
+    .grain{
+      position:fixed; inset:0; pointer-events:none; opacity:.055; z-index:50;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+      mix-blend-mode:multiply;
+    }
+
+    .nav{
+      position:fixed; top:0; left:0; right:0; z-index:40;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px clamp(18px,4vw,54px);
+      background:rgba(17,17,17,.92);
+      backdrop-filter:blur(14px);
+      color:white;
+      border-bottom:1px solid rgba(255,255,255,.12);
+    }
+    .brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.04em}
+    .brand-badge{
+      width:42px;height:42px;border-radius:50%;
+      display:grid;place-items:center;background:var(--hot);
+      box-shadow:0 0 0 3px var(--gold);
+      font-size:22px;
+    }
+    .brand span:last-child{font-family:"Bebas Neue";font-size:25px;letter-spacing:.08em}
+    .navlinks{display:flex;gap:25px;font-weight:700;font-size:14px}
+    .navlinks a{opacity:.86;transition:.2s}
+    .navlinks a:hover{opacity:1;color:var(--gold)}
+    .nav-cta{
+      background:var(--gold); color:#111; padding:10px 17px; border-radius:999px;
+      font-weight:900; font-size:14px; box-shadow:0 6px 0 #b87900;
+      transition:.15s; transform:translateY(-1px);
+    }
+    .nav-cta:hover{transform:translateY(2px);box-shadow:0 3px 0 #b87900}
+    .menu-toggle{display:none;background:none;border:0;color:white;font-size:28px}
+
+    .hero{
+      min-height:100vh; position:relative; display:grid; align-items:end;
+      padding:120px clamp(20px,6vw,90px) 70px;
+      background:
+        linear-gradient(90deg,rgba(0,0,0,.86) 0%,rgba(0,0,0,.58) 44%,rgba(0,0,0,.08) 80%),
+        url("images/food-hero.jpeg") center/cover;
+      isolation:isolate;
+    }
+    .hero:after{
+      content:"";position:absolute;inset:auto 0 0;height:25%;
+      background:linear-gradient(transparent,var(--paper));z-index:-1;
+    }
+    .hero-copy{max-width:850px;color:white;position:relative;z-index:2}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      color:#111;background:var(--gold);padding:8px 13px;border-radius:999px;
+      font-weight:900;text-transform:uppercase;letter-spacing:.1em;font-size:12px;
+      transform:rotate(-2deg); margin-bottom:18px;
+    }
+    h1,h2,h3,.display{font-family:"Bebas Neue",Impact,sans-serif;letter-spacing:.025em}
+    h1{font-size:clamp(74px,13vw,170px);line-height:.79;margin:0 0 20px;text-transform:uppercase}
+    .hero-copy p{font-size:clamp(18px,2.1vw,25px);line-height:1.45;max-width:650px;margin:0 0 30px;font-weight:600}
+    .actions{display:flex;gap:13px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:9px;
+      padding:14px 22px;border-radius:999px;font-weight:900;border:2px solid transparent;
+      transition:.2s;cursor:pointer
+    }
+    .btn-hot{background:var(--hot);color:white;box-shadow:0 7px 0 #9e2b19}
+    .btn-hot:hover{transform:translateY(2px);box-shadow:0 4px 0 #9e2b19}
+    .btn-light{background:white;color:#111}
+    .btn-light:hover{background:var(--gold)}
+
+    .ticker{
+      background:var(--hot);color:white;overflow:hidden;white-space:nowrap;
+      border-top:4px solid #111;border-bottom:4px solid #111;
+    }
+    .ticker-track{display:inline-block;padding:12px 0;animation:marquee 22s linear infinite;font-weight:900;text-transform:uppercase;letter-spacing:.12em}
+    .ticker-track span{margin:0 26px}
+    @keyframes marquee{to{transform:translateX(-50%)}}
+
+    section{padding:95px clamp(20px,6vw,90px);position:relative}
+    .section-head{max-width:850px;margin-bottom:45px}
+    .kicker{color:var(--hot);font-weight:900;text-transform:uppercase;letter-spacing:.14em;font-size:13px}
+    h2{font-size:clamp(54px,8vw,100px);line-height:.85;margin:10px 0 15px}
+    .section-head p{font-size:18px;line-height:1.6;color:var(--muted);max-width:690px}
+
+    .intro{display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:center}
+    .story-card{
+      background:var(--ink);color:white;border-radius:var(--radius);padding:42px;
+      box-shadow:var(--shadow);transform:rotate(-1.2deg)
+    }
+    .story-card h3{font-size:58px;line-height:.9;margin:0 0 18px;color:var(--gold)}
+    .story-card p{line-height:1.75;color:#eee}
+    .sticker{
+      display:inline-block;background:var(--gold);color:#111;padding:8px 13px;
+      font-weight:900;border:3px solid #111;transform:rotate(3deg);margin-top:8px
+    }
+    .photo-stack{position:relative;min-height:470px}
+    .photo-stack img{position:absolute;width:75%;border-radius:28px;border:8px solid white;box-shadow:var(--shadow);object-fit:cover}
+    .photo-stack img:first-child{right:0;top:0;height:370px}
+    .photo-stack img:last-child{left:0;bottom:0;height:330px}
+
+    .menu-section{background:#151515;color:white;overflow:hidden}
+    .menu-section:before{
+      content:"";position:absolute;inset:0;opacity:.12;
+      background-image:linear-gradient(45deg,transparent 48%,#fff 49%,transparent 50%);
+      background-size:24px 24px;
+    }
+    .menu-section .section-head p{color:#cfc8bf}
+    .menu-board{
+      max-width:1080px;margin:auto;background:#202020;border:8px solid #302e2a;
+      border-radius:18px;padding:32px;box-shadow:var(--shadow);
+    }
+    .menu-board h3{font-size:48px;color:var(--gold);margin:0 0 20px}
+    .menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 35px}
+    .menu-group{border-top:1px solid rgba(255,255,255,.18);padding-top:18px}
+    .menu-group:first-child,.menu-group:nth-child(2){border-top:0}
+    .menu-group-title{font-family:"Bebas Neue";font-size:34px;color:white;margin-bottom:10px}
+    .item{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.13)}
+    .item-name{font-weight:800}
+    .item-note{display:block;color:#aaa;font-size:12px;font-weight:500;margin-top:2px}
+    .price{font-weight:900;color:var(--gold);white-space:nowrap}
+    .combo{
+      margin-top:24px;padding:15px 18px;background:var(--hot);border-radius:14px;
+      font-weight:900;text-align:center;font-size:17px
+    }
+    .menu-photo{margin:30px auto 0;max-height:760px;object-fit:contain;border-radius:16px;border:4px solid #444;cursor:zoom-in}
+
+    .crave{background:var(--cream)}
+    .food-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .food-card{
+      background:white;border-radius:22px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.1);
+      transform:translateY(0);transition:.25s
+    }
+    .food-card:hover{transform:translateY(-9px) rotate(-.5deg)}
+    .food-card img{height:230px;width:100%;object-fit:cover}
+    .food-card .copy{padding:18px}
+    .food-card h3{font-size:34px;margin:0 0 5px}
+    .food-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+
+    .combo-banner{
+      margin-top:55px;background:var(--gold);color:#111;border:4px solid #111;
+      border-radius:28px;padding:32px;display:flex;justify-content:space-between;align-items:center;gap:25px;
+      box-shadow:9px 9px 0 #111
+    }
+    .combo-banner h3{font-size:54px;margin:0;line-height:.9}
+    .combo-banner p{margin:8px 0 0;font-weight:700}
+
+    .cta{
+      background:var(--hot);color:white;text-align:center;
+      padding:110px 20px;overflow:hidden
+    }
+    .cta h2{font-size:clamp(70px,12vw,150px);margin:0;line-height:.8}
+    .cta p{font-size:20px;max-width:650px;margin:25px auto 30px;line-height:1.6}
+    .cta .btn-light{border:3px solid #111}
+
+    footer{background:#111;color:white;padding:38px clamp(20px,6vw,90px);display:flex;justify-content:space-between;gap:25px;align-items:center}
+    footer .small{color:#aaa;font-size:13px;line-height:1.5}
+    footer strong{font-family:"Bebas Neue";font-size:31px;letter-spacing:.06em;color:var(--gold)}
+
+    .modal{
+      position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;
+      z-index:100;padding:25px
+    }
+    .modal.open{display:grid}
+    .modal img{max-height:92vh;max-width:95vw;border-radius:10px}
+    .close{position:absolute;right:20px;top:15px;color:white;background:none;border:0;font-size:42px;cursor:pointer}
+
+    .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s,transform .7s}
+    .reveal.visible{opacity:1;transform:none}
+
+    @media(max-width:900px){
+      .navlinks{display:none}
+      .menu-toggle{display:block}
+      .nav.mobile-open .navlinks{
+        display:flex;position:absolute;left:0;right:0;top:74px;background:#111;
+        flex-direction:column;padding:22px 25px;border-bottom:1px solid #333
+      }
+      .intro{grid-template-columns:1fr}
+      .food-grid{grid-template-columns:repeat(2,1fr)}
+      .menu-grid{grid-template-columns:1fr}
+      .menu-group:nth-child(2){border-top:1px solid rgba(255,255,255,.18)}
+      .photo-stack{min-height:520px}
+    }
+    @media(max-width:600px){
+      .nav{padding:13px 17px}
+      .brand span:last-child{font-size:21px}
+      .nav-cta{display:none}
+      .hero{padding:110px 20px 55px;min-height:88vh;background-position:60% center}
+      h1{font-size:78px}
+      section{padding:72px 20px}
+      .story-card{padding:28px}
+      .story-card h3{font-size:48px}
+      .photo-stack{min-height:430px}
+      .photo-stack img:first-child{height:290px;width:83%}
+      .photo-stack img:last-child{height:250px;width:76%}
+      .food-grid{grid-template-columns:1fr}
+      .food-card img{height:260px}
+      .menu-board{padding:18px}
+      .menu-board h3{font-size:40px}
+      .combo-banner{display:block}
+      .combo-banner h3{font-size:46px}
+      footer{display:block}
+      footer strong{display:block;margin-bottom:8px}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grain"></div>
+
+  <nav class="nav" id="nav">
+    <a class="brand" href="#top" aria-label="Mouth Full South home">
+      <span class="brand-badge">🍔</span>
+      <span>Mouth Full South</span>
+    </a>
+    <div class="navlinks">
+      <a href="#story">Our Vibe</a>
+      <a href="#menu">Menu</a>
+      <a href="#cravings">Cravings</a>
+      <a href="#find-us">Find Us</a>
+    </div>
+    <a class="nav-cta" href="#menu">SEE THE MENU ↓</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
+  </nav>
+
+  <main id="top">
+    <header class="hero">
+      <div class="hero-copy reveal">
+        <div class="eyebrow">🔥 EST. 2022 • BIG FLAVOR ON WHEELS</div>
+        <h1>Come<br>Hungry.<br>Leave<br>Happy.</h1>
+        <p>Seafood that hits. Burgers that drip. Wings with attitude. We make the kind of food that has you thinking about your next bite before you've finished the first.</p>
+        <div class="actions">
+          <a class="btn btn-hot" href="#menu">🍴 GET HUNGRY</a>
+          <a class="btn btn-light" href="#find-us">📍 FIND THE TRUCK</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>SEAFOOD</span>✦<span>BURGERS</span>✦<span>WINGS</span>✦<span>LOADED FRIES</span>✦<span>FRESH MADE</span>✦
+        <span>SEAFOOD</span>✦<span>BURGERS</span>✦<span>WINGS</span>✦<span>LOADED FRIES</span>✦<span>FRESH MADE</span>✦
+      </div>
+    </div>
+
+    <section id="story">
+      <div class="intro">
+        <div class="story-card reveal">
+          <div class="kicker" style="color:var(--gold)">THIS IS NOT BORING FOOD</div>
+          <h3>Big bites.<br>Bold sauces.<br>Zero apologies.</h3>
+          <p>Mouth Full South brings comfort-food favorites to the street and turns the flavor all the way up. Think crispy seafood, juicy burgers, saucy wings, loaded fries and Southern-style sides made to disappear fast.</p>
+          <span class="sticker">MADE FRESH ✦ SERVED LOUD</span>
+        </div>
+
+        <div class="photo-stack reveal">
+          <img src="images/food-hero.jpeg" alt="Mouth Full South seafood and food spread">
+          <img src="images/food-hero.jpeg" alt="Juicy burger and seasoned sides from Mouth Full South">
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-section" id="menu">
+      <div class="section-head reveal">
+        <div class="kicker" style="color:var(--gold)">THE GOOD STUFF</div>
+        <h2>Pick Your<br>Weapon.</h2>
+        <p>Come for the smell. Stay because you ordered too much. Our photographed menu is included below so you can check the board exactly as it appears on the truck.</p>
+      </div>
+
+      <div class="menu-board reveal">
+        <h3>🔥 MOUTH FULL MENU</h3>
+
+        <div class="menu-grid">
+          <div class="menu-group">
+            <div class="menu-group-title">SEAFOOD</div>
+            <div class="item"><div><span class="item-name">Seafood Platter</span><span class="item-note">Fried fish + XL shrimp + 2 sides</span></div><span class="price">$20</span></div>
+            <div class="item"><div><span class="item-name">Fish Platter</span><span class="item-note">Fried fish + fries + hush puppies</span></div><span class="price">$21</span></div>
+            <div class="item"><div><span class="item-name">Shrimp Platter</span><span class="item-note">XL shrimp + fries + hush puppies</span></div><span class="price">$21</span></div>
+            <div class="item"><div><span class="item-name">Fish Basket</span><span class="item-note">Fish + fries</span></div><span class="price">$18</span></div>
+            <div class="item"><div><span class="item-name">Shrimp Basket</span><span class="item-note">Shrimp + fries</span></div><span class="price">$18</span></div>
+            <div class="item"><div><span class="item-name">Fish Sandwich w/ Side</span></div><span class="price">$17</span></div>
+          </div>
+
+          <div class="menu-group">
+            <div class="menu-group-title">BURGERS</div>
+            <div class="item"><div><span class="item-name">Big Juicy Burger</span><span class="item-note">1/2 lb patty, house sauce, lettuce, tomato, pickle + grilled onion</span></div><span class="price">$10</span></div>
+            <div class="item"><div><span class="item-name">Blackened Blue</span><span class="item-note">House sauce, blue cheese, lettuce, tomato + grilled onion</span></div><span class="price">$13</span></div>
+            <div class="item"><div><span class="item-name">Korean BBQ Burger w/ Bacon</span><span class="item-note">Lettuce, tomato, pickle</span></div><span class="price">$12</span></div>
+            <div class="item"><div><span class="item-name">Bacon Ranch Burger</span><span class="item-note">Lettuce, tomato, pickle</span></div><span class="price">$12</span></div>
+          </div>
+
+          <div class="menu-group">
+            <div class="menu-group-title">WINGS</div>
+            <div class="item"><div><span class="item-name">Boneless Wings</span><span class="item-note">Korean BBQ • Buffalo Ranch</span></div><span class="price">$18</span></div>
+          </div>
+
+          <div class="menu-group">
+            <div class="menu-group-title">CHICKEN</div>
+            <div class="item"><div><span class="item-name">Country Chicken Sandwich</span><span class="item-note">Toasted bun + pickles</span></div><span class="price">$10</span></div>
+            <div class="item"><div><span class="item-name">Korean BBQ Chicken</span></div><span class="price">$11</span></div>
+            <div class="item"><div><span class="item-name">Buffalo Ranch</span></div><span class="price">$11</span></div>
+          </div>
+
+          <div class="menu-group">
+            <div class="menu-group-title">LOADED FRIES</div>
+            <div class="item"><div><span class="item-name">Loaded Fries</span><span class="item-note">Fries + fried chicken bites • Korean BBQ • Buffalo Ranch • Animal Fries</span></div><span class="price">$16</span></div>
+          </div>
+
+          <div class="menu-group">
+            <div class="menu-group-title">SIDES</div>
+            <div class="item"><div><span class="item-name">Fries</span></div><span class="price">$6</span></div>
+            <div class="item"><div><span class="item-name">Hush Puppies</span><span class="item-note">w/ local honey butter</span></div><span class="price">$6</span></div>
+            <div class="item"><div><span class="item-name">Sweet Plantains</span></div><span class="price">$6</span></div>
+            <div class="item"><div><span class="item-name">Korean Fries</span></div><span class="price">$10</span></div>
+            <div class="item"><div><span class="item-name">Buffalo Fries</span></div><span class="price">$10</span></div>
+            <div class="item"><div><span class="item-name">Animal Fry</span></div><span class="price">$12</span></div>
+          </div>
+        </div>
+
+        <div class="combo">🍟 + 🥤 ADD A SIDE + ANY DRINK TO ANY SANDWICH FOR +$9 — COMBO!</div>
+        <img class="menu-photo" id="menuPhoto" src="images/menu-board.jpeg" alt="Original Mouth Full South handwritten menu board">
+      </div>
+    </section>
+
+    <section class="crave" id="cravings">
+      <div class="section-head reveal">
+        <div class="kicker">YOU KNOW YOU WANT IT</div>
+        <h2>The Scroll-<br>Stoppers.</h2>
+        <p>That moment when the food arrives and everybody suddenly goes quiet? Yeah. These are those meals.</p>
+      </div>
+
+      <div class="food-grid">
+        <article class="food-card reveal">
+          <img src="images/food-hero.jpeg" alt="Crispy sauced seafood">
+          <div class="copy"><h3>SEAFOOD</h3><p>Crispy fried fish and shrimp, dressed up with big flavor and ready for serious dipping.</p></div>
+        </article>
+        <article class="food-card reveal">
+          <img src="images/food-hero.jpeg" alt="Juicy burger with sides">
+          <div class="copy"><h3>BURGERS</h3><p>Big, juicy, messy-in-the-best-way burgers with house sauces and all the fixings.</p></div>
+        </article>
+        <article class="food-card reveal">
+          <img src="images/food-hero.jpeg" alt="Seasoned sides">
+          <div class="copy"><h3>SIDES</h3><p>Golden fries, hush puppies with honey butter, sweet plantains and more.</p></div>
+        </article>
+        <article class="food-card reveal">
+          <img src="images/food-hero.jpeg" alt="Loaded food from Mouth Full South">
+          <div class="copy"><h3>LOADED</h3><p>Loaded fries, chicken bites and sauces stacked until the only sensible move is to dig in.</p></div>
+        </article>
+      </div>
+
+      <div class="combo-banner reveal">
+        <div>
+          <h3>MAKE IT A COMBO.</h3>
+          <p>Add a side + any drink to any sandwich for just $9.</p>
+        </div>
+        <a class="btn btn-hot" href="#menu">BUILD MY MEAL →</a>
+      </div>
+    </section>
+
+    <section class="cta" id="find-us">
+      <div class="kicker" style="color:#111">THE TRUCK IS CALLING</div>
+      <h2>FOLLOW<br>THE FLAVOR.</h2>
+      <p>Drop your current truck location, ordering link, phone number or social pages into this section when you're ready. The buttons below are intentionally easy to edit.</p>
+      <div class="actions" style="justify-content:center">
+        <a class="btn btn-light" href="https://www.google.com/maps" target="_blank" rel="noopener">📍 CURRENT LOCATION</a>
+        <a class="btn btn-light" href="#menu">🍔 MENU</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>
+      <strong>Mouth Full South</strong>
+      <div class="small">EST. 2022 • Fresh-made food truck • Seafood • Burgers • Wings</div>
+    </div>
+    <div class="small">© <span id="year"></span> Mouth Full South. Menu prices may change.</div>
+  </footer>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <button class="close" id="closeModal" aria-label="Close">×</button>
+    <img src="images/menu-board.jpeg" alt="Mouth Full South menu board enlarged">
+  </div>
+
+  <script>
+    // QUICK EDITS:
+    // 1) Change the Current Location button URL above.
+    // 2) Add Instagram/Facebook/ordering links to the nav/footer.
+    // 3) Replace images/food-hero.jpeg with a sharper hero photo when available.
+
+    const nav = document.getElementById('nav');
+    document.getElementById('menuToggle').addEventListener('click', () => nav.classList.toggle('mobile-open'));
+    document.querySelectorAll('.navlinks a').forEach(a => a.addEventListener('click', () => nav.classList.remove('mobile-open')));
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, {threshold:.12});
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    const modal = document.getElementById('modal');
+    const menuPhoto = document.getElementById('menuPhoto');
+    const closeModal = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); };
+    menuPhoto.addEventListener('click', () => { modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); });
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
