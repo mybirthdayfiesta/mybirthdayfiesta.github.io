@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f4efe6">
+<title>日本 JOURNAL — Japan 2026</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600;700;800&display=swap');
+:root{--paper:#f4efe6;--ink:#171717;--red:#d92828;--blue:#164c63;--gold:#c49a52;--gray:#77736b;--white:#fffdf8;--border:#d8d0c2}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"DM Sans",Arial,sans-serif}
+a{text-decoration:none;color:inherit}.wrap{width:min(1240px,92%);margin:auto}
+.topbar{height:72px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:13px;letter-spacing:.22em;font-weight:700}.brand span{color:var(--red)}
+.nav{display:flex;gap:25px;font-size:12px;text-transform:uppercase;letter-spacing:.12em}
+.nav a:hover{color:var(--red)}
+.hero{padding:58px 0 70px;border-bottom:1px solid var(--border)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:55px;align-items:center}
+.kana{font-size:13px;color:var(--red);letter-spacing:.28em;font-weight:700}
+h1{font-family:"Playfair Display",serif;font-size:clamp(5rem,11vw,10.5rem);line-height:.78;letter-spacing:-.08em;margin:22px 0}
+.hero-copy{font-size:17px;line-height:1.75;max-width:600px;color:#4f4b45}
+.meta{display:flex;gap:35px;margin-top:35px;border-top:1px solid var(--border);padding-top:20px}
+.meta b{display:block;font-size:22px}.meta span{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--gray)}
+.hero-photo{height:650px;position:relative;background:url("https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1300&q=88") center/cover}
+.hero-photo:after{content:"TOKYO";position:absolute;bottom:-22px;right:-8px;font-family:"Playfair Display";font-size:90px;letter-spacing:-.06em;color:var(--red);writing-mode:vertical-rl}
+.stamp{position:absolute;top:20px;left:20px;border:2px solid var(--red);color:var(--red);width:85px;height:85px;border-radius:50%;display:grid;place-items:center;text-align:center;font-size:10px;font-weight:700;transform:rotate(-12deg);background:rgba(244,239,230,.82)}
+section{padding:90px 0}.section-label{display:flex;align-items:center;gap:16px;font-size:11px;text-transform:uppercase;letter-spacing:.2em;color:var(--red);font-weight:700}.section-label:after{content:"";height:1px;background:var(--border);flex:1}
+h2{font-family:"Playfair Display";font-size:clamp(3rem,7vw,7rem);line-height:.88;letter-spacing:-.07em;margin:18px 0 45px}
+.intro-grid{display:grid;grid-template-columns:1fr 2fr;gap:50px}.intro-grid p{font-size:19px;line-height:1.8;margin-top:0}
+.cities{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.city{height:470px;position:relative;background-size:cover;background-position:center;overflow:hidden}
+.city:nth-child(1){background-image:linear-gradient(0deg,rgba(0,0,0,.65),transparent 60%),url("https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=900&q=85")}
+.city:nth-child(2){background-image:linear-gradient(0deg,rgba(0,0,0,.65),transparent 60%),url("https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=900&q=85")}
+.city:nth-child(3){background-image:linear-gradient(0deg,rgba(0,0,0,.65),transparent 60%),url("https://images.unsplash.com/photo-1590559899731-a382839e5549?auto=format&fit=crop&w=900&q=85")}
+.city-info{position:absolute;bottom:24px;left:24px;color:white}.city-info small{text-transform:uppercase;letter-spacing:.15em}.city-info h3{font-family:"Playfair Display";font-size:42px;margin:4px 0}
+.vertical{position:relative;padding-left:90px}.vertical:before{content:"";position:absolute;left:38px;top:0;bottom:0;width:1px;background:var(--border)}
+.item{position:relative;display:grid;grid-template-columns:150px 1fr;gap:30px;padding:0 0 38px;margin-bottom:35px}
+.item:before{content:"";position:absolute;left:-58px;top:5px;width:13px;height:13px;background:var(--red);border-radius:50%;box-shadow:0 0 0 7px var(--paper),0 0 0 8px var(--red)}
+.item-date{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--red);font-weight:700}
+.item h3{font-family:"Playfair Display";font-size:32px;margin:0 0 8px}.item p{margin:0;color:#625e56;line-height:1.7}
+.pill{display:inline-block;border:1px solid var(--border);padding:5px 9px;margin-top:12px;font-size:9px;letter-spacing:.12em;text-transform:uppercase}.pill.booked{border-color:var(--blue);color:var(--blue)}.pill.pending{border-color:var(--gold);color:#987331}
+.feature{background:var(--blue);color:white;padding:75px 0}.feature h2{margin-bottom:20px}.feature p{color:#d6e0e3;max-width:700px;font-size:18px;line-height:1.8}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);margin-top:40px;border-top:1px solid rgba(255,255,255,.2);border-bottom:1px solid rgba(255,255,255,.2)}
+.stat{padding:25px 20px;border-right:1px solid rgba(255,255,255,.2)}.stat:last-child{border:0}.stat b{font-size:30px;display:block}.stat span{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#b7c7cb}
+.todo{display:grid;grid-template-columns:1fr 1fr;gap:15px}.todo label{display:flex;gap:15px;padding:20px;background:var(--white);border:1px solid var(--border);align-items:flex-start}.todo input{accent-color:var(--red);margin-top:4px}.todo b{display:block}.todo small{color:var(--gray);line-height:1.5}
+.linkgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}.link{background:var(--paper);padding:25px;display:flex;justify-content:space-between}.link:hover{background:var(--white)}.link span{font-family:"Playfair Display";font-size:23px}.link small{display:block;font:11px "DM Sans";color:var(--gray);margin-top:5px}
+footer{background:#171717;color:#e9e4d9;padding:60px 0;text-align:center}.footerjp{font-size:42px;color:#d92828;font-family:"Playfair Display"}
+@media(max-width:800px){.nav{display:none}.hero-grid,.intro-grid{grid-template-columns:1fr}.hero-photo{height:440px}.cities{grid-template-columns:1fr}.city{height:390px}.vertical{padding-left:55px}.vertical:before{left:20px}.item{grid-template-columns:1fr;gap:8px}.item:before{left:-41px}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(3){border-top:1px solid rgba(255,255,255,.2)}.todo,.linkgrid{grid-template-columns:1fr}section{padding:65px 0}}
+</style>
+</head>
+<body>
+
+<div class="wrap topbar">
+  <div class="brand">日本 <span>JOURNAL</span> / 26</div>
+  <nav class="nav"><a href="https://Luisandreagan.com">Upload Pictures</a><a href="https://docs.google.com/spreadsheets/d/1BCSMRbFEpdGWHwxKRqLqvPrTTE6m-S8d8AHtv21qgTI/edit?usp=sharing">Google Sheet</a><a href="#story">The Story</a><a href="#days">Journal</a><a href="#prep">Prep</a><a href="#links">Links</a></nav>
+</div>
+
+<header class="hero">
+<div class="wrap hero-grid">
+<div>
+<div class="kana">TOKYO · KYOTO · OSAKA</div>
+<h1>Japan,<br>2026.</h1>
+<p class="hero-copy">A ten-day escape across Japan. We arrive in Tokyo, chase neon through the city, disappear into Kyoto's temples and mountains, spend a day eating our way through Osaka, then return to Tokyo for one last night.</p>
+<div class="meta"><div><b>10</b><span>Days</span></div><div><b>03</b><span>Cities</span></div><div><b>10.01</b><span>Departure</span></div></div>
+</div>
+<div class="hero-photo"><div class="stamp">旅<br>2026<br>TRIP</div></div>
+</div>
+</header>
+
+<section id="story">
+<div class="wrap">
+<div class="section-label">01 / The route</div>
+<div class="intro-grid">
+<h2>A trip worth<br>remembering.</h2>
+<div><p>Forget the ordinary vacation. This is a moving postcard through Japan—late-night Tokyo streets, ancient Kyoto temples, bamboo forests, mountain hot springs, Osaka markets, sumo, arcades and plenty of food.</p><p>Bring comfortable shoes, an appetite and enough room on your camera roll.</p></div>
+</div>
+<div class="cities">
+<div class="city"><div class="city-info"><small>Oct 2–4 / Oct 8–10</small><h3>Tokyo</h3></div></div>
+<div class="city"><div class="city-info"><small>Oct 4–8</small><h3>Kyoto</h3></div></div>
+<div class="city"><div class="city-info"><small>Oct 7 / day trip</small><h3>Osaka</h3></div></div>
+</div>
+</div>
+</section>
+
+<section id="days">
+<div class="wrap">
+<div class="section-label">02 / The journal</div>
+<h2>Ten days.<br>Zero boring ones.</h2>
+<div class="vertical">
+
+<div class="item"><div class="item-date">Oct 01 / Thu</div><div><h3>✈ Departure</h3><p>Fly out of the USA and wake up ready for Japan.</p><span class="pill">Travel day</span></div></div>
+
+<div class="item"><div class="item-date">Oct 02 / Fri</div><div><h3>Tokyo · First impressions</h3><p>Check into the Roppongi hotel, walk Ginza and hit Harajuku for food. First night in Japan.</p><span class="pill booked">Hotel planned</span></div></div>
+
+<div class="item"><div class="item-date">Oct 03 / Sat</div><div><h3>Asakusa → SkyTree → Shibuya</h3><p>Senso-ji Temple, Tokyo Skytree around sunset, then Mario Kart in Shibuya at 7 PM. Finish the night around Shinjuku.</p><span class="pill booked">Mario Kart · 7 PM</span></div></div>
+
+<div class="item"><div class="item-date">Oct 04 / Sun</div><div><h3>Tokyo → Kyoto</h3><p>Check out, take the train to Kyoto, settle into Hotel Intergate and experience teamLab Kyoto before dinner.</p><span class="pill pending">Train pending</span></div></div>
+
+<div class="item"><div class="item-date">Oct 05 / Mon</div><div><h3>Arashiyama day</h3><p>9 AM river boat ride, Bamboo Forest, lunch, Fushimi Inari and Kiyomizu-dera.</p><span class="pill booked">Boat ride booked</span></div></div>
+
+<div class="item"><div class="item-date">Oct 06 / Tue</div><div><h3>Mountains & onsen</h3><p>Sanzen-in Temple, Kurama-dera and a relaxing stop at Kurama Onsen.</p><span class="pill">Kyoto mountains</span></div></div>
+
+<div class="item"><div class="item-date">Oct 07 / Wed</div><div><h3>Osaka, one day</h3><p>Tea ceremony possibility, Shimada store sake, the market and whatever Osaka throws at us.</p><span class="pill pending">Tea ceremony pending</span></div></div>
+
+<div class="item"><div class="item-date">Oct 08 / Thu</div><div><h3>Kyoto → Tokyo</h3><p>Back to Tokyo, check into Nishishinjuku, catch a sumo show and keep the night going at a 24-hour arcade.</p><span class="pill pending">Train pending</span></div></div>
+
+<div class="item"><div class="item-date">Oct 09 / Fri</div><div><h3>Final Tokyo chapter</h3><p>Shopping, Shibuya Sky and the Tokyo car scene. One last big night.</p><span class="pill booked">Shibuya Sky booked</span></div></div>
+
+<div class="item"><div class="item-date">Oct 10 / Sat</div><div><h3>✈ Sayonara</h3><p>Fly back to the USA with a camera roll full of evidence.</p><span class="pill">Until next time</span></div></div>
+
+</div>
+</div>
+</section>
+
+<section class="feature">
+<div class="wrap">
+<div class="section-label" style="color:#ff827f">03 / By the numbers</div>
+<h2>The trip,<br>at a glance.</h2>
+<p>The current itinerary tracks approximately $1,751.81 in listed trip costs, with about $540 currently marked as pending. Hotel, activity and transportation costs can change as remaining reservations are finalized.</p>
+<div class="stats">
+<div class="stat"><b>$1,751.81</b><span>Listed total</span></div>
+<div class="stat"><b>$540</b><span>Pending estimate</span></div>
+<div class="stat"><b>3</b><span>Cities</span></div>
+<div class="stat"><b>10</b><span>Days</span></div>
+</div>
+</div>
+</section>
+
+<section id="prep">
+<div class="wrap">
+<div class="section-label">04 / Before departure</div>
+<h2>Pack smart.<br>Arrive ready.</h2>
+<div class="todo">
+<label><input type="checkbox"><span><b>Visit Japan Web</b><small>Complete the arrival/customs form and save the QR code.</small></span></label>
+<label><input type="checkbox"><span><b>Set up Suica</b><small>Apple Wallet → + → Transit Card → Japan → Suica.</small></span></label>
+<label><input type="checkbox"><span><b>Phone data / eSIM</b><small>Coordinate the group eSIM plan or purchase your own.</small></span></label>
+<label><input type="checkbox"><span><b>International Driving Permit</b><small>Only needed if you plan to drive.</small></span></label>
+<label><input type="checkbox"><span><b>Passport & digital backup</b><small>Check expiration and keep a secure copy.</small></span></label>
+<label><input type="checkbox"><span><b>Comfortable walking shoes</b><small>Seriously. You are going to walk a lot.</small></span></label>
+</div>
+</div>
+</section>
+
+<section id="links">
+<div class="wrap">
+<div class="section-label">05 / Useful links</div>
+<h2>Keep these<br>handy.</h2>
+<div class="linkgrid">
+<a class="link" href="https://services.digital.go.jp/en/visit-japan-web/" target="_blank"><span>Visit Japan Web<small>Arrival / customs</small></span>↗</a>
+<a class="link" href="https://kyoto.tickets.teamlab.art/" target="_blank"><span>teamLab Kyoto<small>Tickets</small></span>↗</a>
+<a class="link" href="https://www.klook.com/en-US/activity/74947-kyoto-arashiyama-hozugawa-river-boat-ride/" target="_blank"><span>Arashiyama Boat Ride<small>Oct 5 · 9 AM</small></span>↗</a>
+<a class="link" href="https://www.kuramadera.or.jp/" target="_blank"><span>Kurama-dera<small>Temple</small></span>↗</a>
+<a class="link" href="https://webket.jp/pc/ticket/itemdetail?fc=00396&ac=8001&igc=0030&lang=1" target="_blank"><span>Shibuya Sky<small>Oct 9 · purchased</small></span>↗</a>
+<a class="link" href="https://tokyo.com/guide/experience/round-1-stadium" target="_blank"><span>Round1 Stadium<small>Arcade</small></span>↗</a>
+<a class="link" href="https://www.aaa-idp.com/" target="_blank"><span>AAA IDP<small>Driving permit</small></span>↗</a>
+<a class="link" href="https://cellulardata.ubigi.com/rates-and-coverage/japan-data-plans/japan-unlimited-15-days/?wmc-currency=USD" target="_blank"><span>Ubigi<small>Japan eSIM</small></span>↗</a>
+</div>
+</div>
+</section>
+
+<footer><div class="footerjp">日本</div><p>JAPAN 2026 · TOKYO / KYOTO / OSAKA</p><p>10.01.26 — 10.10.26</p></footer>
+</body>
+</html>
